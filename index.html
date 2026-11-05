@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3B2416">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Beer Me Up">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Beer Me Up</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3E7D0; --surface:#FFF9EE; --surface-2:#F1E2C6; --ink:#2B1A10; --muted:#7A5E46; --line:#E3CFAE;
+  --amber:#D98A12; --amber-deep:#A9620A; --amber-soft:#FBE7BF; --foam:#FFF6E0; --wood:#3B2416; --wood-2:#5A3622;
+  --red:#A8322A; --red-soft:#F6DCD5; --on-amber:#2B1A10;
+  --banner:linear-gradient(160deg,#2E1B10 0%,#4A2C1A 60%,#6B3F1F 100%);
+  --shadow:0 1px 2px rgba(43,26,16,.08),0 8px 24px rgba(43,26,16,.10);
+  --display:'Alfa Slab One',Rockwell,Georgia,serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1A100A; --surface:#25170F; --surface-2:#332117; --ink:#F6E9D2; --muted:#C2A88A; --line:#3F2B1E;
+    --amber:#F2A93B; --amber-deep:#F2A93B; --amber-soft:#3A2810; --foam:#FFF6E0;
+    --red:#EC7B6E; --red-soft:#3D1F1A; --on-amber:#2B1A10;
+    --banner:linear-gradient(160deg,#120A05 0%,#2E1B10 60%,#4A2C1A 100%);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1A100A; --surface:#25170F; --surface-2:#332117; --ink:#F6E9D2; --muted:#C2A88A; --line:#3F2B1E;
+  --amber:#F2A93B; --amber-deep:#F2A93B; --amber-soft:#3A2810; --foam:#FFF6E0;
+  --red:#EC7B6E; --red-soft:#3D1F1A; --on-amber:#2B1A10;
+  --banner:linear-gradient(160deg,#120A05 0%,#2E1B10 60%,#4A2C1A 100%);
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:560px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom))}
+.svgdefs{position:absolute;width:0;height:0;overflow:hidden}
+
+/* en-tête */
+.top{position:relative;overflow:hidden;background:var(--banner);border-radius:26px;padding:20px 18px 18px;margin-bottom:16px;color:var(--foam);box-shadow:var(--shadow)}
+.top .bubbles{position:absolute;inset:0;pointer-events:none}
+.top .bubbles span{position:absolute;border-radius:50%;background:rgba(255,246,224,.10);border:1px solid rgba(255,246,224,.16)}
+.brand{position:relative;font-family:var(--display);font-size:36px;line-height:1;margin:0;letter-spacing:.01em;color:var(--amber)}
+.brand em{font-style:normal;color:var(--foam)}
+.sub{position:relative;margin:6px 0 0;font-size:13px;opacity:.85}
+.chips{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{background:rgba(255,246,224,.14);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.chip.gold{background:var(--amber);color:var(--on-amber)}
+.icon-btn{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,246,224,.14);display:grid;place-items:center;color:var(--foam);z-index:1}
+.icon-btn svg{width:19px;height:19px}
+.banner{background:var(--red-soft);border:1px solid var(--red);border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+
+.tab{display:none}
+.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--muted);margin:0 0 6px}
+h2{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.2;margin:0 0 6px;letter-spacing:.01em}
+h3{font-family:var(--display);font-weight:400;font-size:20px;line-height:1.2;margin:0 0 8px;letter-spacing:.01em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.section-title{font-family:var(--display);font-size:18px;margin:22px 4px 10px;letter-spacing:.01em}
+
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:600;background:var(--surface-2);transition:transform .1s ease,filter .15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--amber);color:var(--on-amber);box-shadow:0 6px 16px rgba(217,138,18,.28)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.danger{background:var(--red-soft);color:var(--red)}
+.btn.big{width:100%;padding:16px;font-size:17px;border-radius:16px}
+.btn.sm{padding:8px 12px;font-size:14px;border-radius:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row > .btn{flex:1}
+
+/* niveau */
+.level{display:flex;gap:14px;align-items:center}
+.medal{flex:none;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:var(--amber-soft);border:3px solid var(--amber)}
+.level .name{font-family:var(--display);font-size:21px;line-height:1.15}
+.bar-track{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--amber),#F7C35C);border-radius:999px;transition:width .5s ease}
+
+.search{width:100%;margin:4px 0 14px}
+/* tampons */
+.stamps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cell{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:8px;aspect-ratio:1;display:grid;place-items:center;box-shadow:var(--shadow)}
+.cell svg{width:100%;height:100%;display:block}
+.cell .pic{position:absolute;right:8px;bottom:8px;font-size:13px;background:var(--surface-2);border-radius:999px;padding:1px 6px}
+.empty{text-align:center;padding:26px 10px;color:var(--muted)}
+.empty .e{font-size:44px}
+.empty p{margin:6px 0 14px}
+
+/* bars */
+.filters{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.pill{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:14px;font-weight:500}
+.pill.active{background:var(--wood);color:var(--foam);border-color:var(--wood)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.active{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}}
+:root[data-theme="dark"] .pill.active{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}
+.barlist{display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.bar .dot{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--surface-2);border:2px dashed var(--line)}
+.bar.visited .dot{background:var(--amber-soft);border:2px solid var(--amber)}
+.bar .b{flex:1;min-width:0}
+.bar strong{display:block;font-size:16px;line-height:1.25}
+.bar .meta{font-size:13px;color:var(--muted);margin-top:2px}
+.bar .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--amber-deep);margin-top:4px}
+.bar .dist{flex:none;font-size:13px;font-weight:600;color:var(--muted)}
+.note-src{font-size:12px;color:var(--muted);margin:14px 4px 0;text-align:center}
+
+/* envies */
+.wish-add{display:flex;gap:8px}
+.wish-add input{flex:1}
+.wlist{list-style:none;margin:0;padding:0}
+.wlist li{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.wlist li:last-child{border-bottom:0}
+.wlist .b{flex:1;min-width:0}
+.wlist .t{font-weight:600}
+.del{background:none;border:0;color:var(--muted);font-size:20px;padding:4px 8px;opacity:.7}
+
+/* année */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}
+.stat .label{font-size:12px;color:var(--muted);font-weight:500}
+.stat .value{font-family:var(--display);font-size:28px;line-height:1.2;margin-top:2px}
+.hbar{display:grid;grid-template-columns:110px 1fr 28px;gap:8px;align-items:center;font-size:13px;margin-bottom:8px}
+.hbar .tr{height:12px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.hbar .fl{height:100%;border-radius:999px}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;align-items:end;height:90px}
+.months div{background:var(--amber);border-radius:6px 6px 2px 2px;min-height:3px}
+.months-l{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
+.trophies{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center}
+.trophy .m{font-size:30px}
+.trophy .n{font-size:11px;font-weight:600}
+.trophy.off{opacity:.35;filter:grayscale(1)}
+.top3{list-style:none;margin:0;padding:0}
+.top3 li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.top3 li:last-child{border-bottom:0}
+.gold{color:var(--amber-deep)}
+
+/* formulaires */
+input[type=date],input[type=text],input[type=search],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px;font-size:16px}
+textarea{min-height:84px;resize:vertical}
+label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin:0 0 12px}
+label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.flabel{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.stars{display:flex;gap:4px;margin-bottom:12px}
+.stars button{background:none;border:0;font-size:32px;line-height:1;padding:2px;color:var(--line)}
+.stars button.on{color:var(--amber)}
+.check{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--ink);margin-bottom:12px}
+.check input{width:22px;height:22px;accent-color:var(--amber)}
+.newbar{background:var(--surface-2);border-radius:14px;padding:12px 12px 2px;margin:-4px 0 12px}
+.prev{width:100%;border-radius:14px;margin-top:10px;display:block}
+
+/* nav */
+.bottom{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:10}
+.bottom .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
+.nav{background:none;border:0;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:500;color:var(--muted)}
+.nav .e{font-size:20px;line-height:1.2;filter:grayscale(1);opacity:.7}
+.nav.active{color:var(--amber-deep)}
+.nav.active .e{filter:none;opacity:1}
+.nav.stampbtn{color:var(--ink);font-weight:700}
+.nav.stampbtn .e{filter:none;opacity:1;width:58px;height:58px;margin-top:-26px;border-radius:50%;background:var(--amber);display:grid;place-items:center;font-size:28px;box-shadow:0 6px 18px rgba(217,138,18,.45);border:4px solid var(--surface)}
+
+/* feuille */
+.sheet-wrap{position:fixed;inset:0;background:rgba(20,10,5,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20;opacity:0;transition:opacity .2s}
+.sheet-wrap.open{opacity:1}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto;transform:translateY(24px);transition:transform .2s}
+.sheet-wrap.open .sheet{transform:none}
+.sheet-actions{display:flex;gap:10px;margin-top:8px}
+.sheet-actions .btn{flex:1}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.detail-stamp{width:min(250px,72%);margin:0 auto 10px;display:block}
+.facts{list-style:none;margin:0 0 12px;padding:0}
+.facts li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.facts li span:first-child{color:var(--muted)}
+.facts li span:last-child{text-align:right}
+.souvenir{background:var(--amber-soft);border-radius:14px;padding:12px 14px;font-size:15px;margin-bottom:12px;white-space:pre-wrap}
+.link{background:none;border:0;padding:0;color:var(--amber-deep);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* animation tampon */
+.fx{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(20,10,5,0);transition:background .25s;padding:24px}
+.fx.on{background:rgba(20,10,5,.62)}
+.fx .paper{position:relative;width:min(300px,78vw);aspect-ratio:1;border-radius:24px;background:var(--foam);box-shadow:0 20px 50px rgba(0,0,0,.4);display:grid;place-items:center;padding:14px;opacity:0;transform:translateY(20px);transition:all .25s}
+.fx.on .paper{opacity:1;transform:none}
+.fx .st{width:100%;height:100%;opacity:0;transform:scale(2.6) rotate(-24deg)}
+.fx.slam .st{animation:slam .34s cubic-bezier(.55,0,.75,.2) forwards}
+@keyframes slam{0%{opacity:0;transform:scale(2.6) rotate(-24deg)}70%{opacity:1;transform:scale(.94) rotate(var(--r))}85%{transform:scale(1.03) rotate(var(--r))}100%{opacity:1;transform:scale(1) rotate(var(--r))}}
+.fx .ring{position:absolute;inset:18%;border-radius:50%;border:3px solid var(--amber);opacity:0}
+.fx.slam .ring{animation:ring .6s .26s ease-out}
+@keyframes ring{0%{opacity:.8;transform:scale(.8)}100%{opacity:0;transform:scale(1.6)}}
+.fx .msg{color:var(--foam);text-align:center;font-family:var(--display);font-size:22px;line-height:1.25;opacity:0;transition:opacity .3s .45s;max-width:320px}
+.fx.slam .msg{opacity:1}
+.fx .msg small{display:block;font-family:var(--body);font-size:14px;opacity:.85;margin-top:6px}
+.shake{animation:shake .25s .24s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translate(2px,-2px)}50%{transform:translate(-2px,2px)}75%{transform:translate(1px,1px)}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:999px;font-size:14px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:all .2s;z-index:60;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
+.toast button{background:none;border:0;color:var(--amber);font-weight:700;text-decoration:underline;padding:0}
+@media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
+</style>
+</head>
+<body>
+<svg class="svgdefs" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="11" result="m"/>
+      <feColorMatrix in="m" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.4 0 0 0 2.05" result="mask"/>
+      <feComposite in="d" in2="mask" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <div class="bubbles" aria-hidden="true">
+      <span style="width:150px;height:150px;right:-40px;top:-60px"></span>
+      <span style="width:60px;height:60px;right:90px;top:30px"></span>
+      <span style="width:26px;height:26px;right:60px;bottom:18px"></span>
+      <span style="width:90px;height:90px;right:150px;bottom:-50px"></span>
+    </div>
+    <h1 class="brand">Beer <em>Me</em> Up</h1>
+    <p class="sub" id="sub">Passeport d'Aurore · Strasbourg</p>
+    <div class="chips" id="chips"></div>
+    <button class="icon-btn" id="btnSettings" aria-label="Réglages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <main>
+    <section id="tab-passeport" class="tab active"></section>
+    <section id="tab-bars" class="tab"></section>
+    <section id="tab-envies" class="tab"></section>
+    <section id="tab-annee" class="tab"></section>
+  </main>
+</div>
+
+<nav class="bottom" aria-label="Navigation">
+  <div class="in">
+    <button class="nav active" data-tab="passeport"><span class="e">🎫</span>Passeport</button>
+    <button class="nav" data-tab="bars"><span class="e">📍</span>Bars</button>
+    <button class="nav stampbtn" id="btnStamp" aria-label="Tamponner une bière"><span class="e">🍺</span>Tamponner</button>
+    <button class="nav" data-tab="envies"><span class="e">📝</span>À goûter</button>
+    <button class="nav" data-tab="annee"><span class="e">🏆</span>Mon année</button>
+  </div>
+</nav>
+
+<div id="sheet" class="sheet-wrap" hidden><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div>
+<div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p></div>
+<div id="toast" class="toast" role="status"></div>
+<input type="file" id="photoInput" accept="image/*" hidden>
+<input type="file" id="importInput" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- outils ---------- */
+const KEY = 'beermeup-v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parse = s => { const p = String(s).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+const today = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const plural = (n, w, wp) => n + ' ' + (Math.abs(n) > 1 ? (wp || w + 's') : w);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const MONTHS_S = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+function fmtDay(d){ const o = {day:'numeric', month:'long'}; if (d.getFullYear() !== today().getFullYear()) o.year = 'numeric'; return d.toLocaleDateString('fr-FR', o); }
+function monthsBetween(a, b){ let m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (b.getDate() < a.getDate()) m--; return Math.max(0, m); }
+function hash(s){ let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+
+/* ---------- référentiels ---------- */
+const STYLES = [
+  ['blonde', 'Blonde, lager, pils', '#C7811A'],
+  ['blanche', 'Blanche', '#3C7FA8'],
+  ['ipa', 'IPA', '#4C7D2F'],
+  ['ambree', 'Ambrée', '#B5532A'],
+  ['brune', 'Brune, stout, porter', '#5A3420'],
+  ['triple', 'Triple, belge', '#8E2B3A'],
+  ['sour', 'Sour, fruitée', '#A63A6B'],
+  ['sans', 'Sans alcool', '#1F7A75'],
+  ['autre', 'Autre', '#33415C']
+];
+const STYLE = Object.fromEntries(STYLES.map(s => [s[0], {label:s[1], color:s[2]}]));
+const SERVICES = [['pression', 'Pression'], ['bouteille', 'Bouteille'], ['canette', 'Canette']];
+const SERVICE = Object.fromEntries(SERVICES);
+const QUARTIERS = ['Krutenau', 'Gare', 'Centre', 'Neudorf'];
+const LEVELS = [
+  {min:0,  name:'Curieuse', icon:'🌱'},
+  {min:5,  name:'Bronze',   icon:'🥉'},
+  {min:15, name:'Argent',   icon:'🥈'},
+  {min:30, name:'Or',       icon:'🥇'},
+  {min:60, name:'Légende',  icon:'👑'}
+];
+const SEED_DATE = '5 novembre 2026';
+const SEED_BARS = [
+  {id:'s1',  name:'Académie de la Bière Krutenau', addr:'6 rue Sainte-Catherine', q:'Krutenau', lat:48.580207, lon:7.757185, info:'Une vingtaine de bières à la pression et plus de 75 en bouteille.'},
+  {id:'s2',  name:'Au Brasseur', addr:'22 rue des Veaux', q:'Krutenau', lat:48.582523, lon:7.755326, info:'Brasse ses propres bières : blonde, ambrée, brune. Ambiance étudiante.'},
+  {id:'s3',  name:'La Victoire', addr:'24 quai des Pêcheurs', q:'Krutenau', lat:48.584019, lon:7.758870, info:'Microbrasserie à l’étage : demande la bière brassée sur place.'},
+  {id:'s4',  name:'Le Local', addr:'rue de l’Abreuvoir', q:'Krutenau', lat:48.579126, lon:7.760381, info:'Bières craft, dont des artisanales alsaciennes. Concerts.'},
+  {id:'s5',  name:'Le Terminal', addr:'6 place Saint-Nicolas-aux-Ondes', q:'Krutenau', lat:48.581290, lon:7.761777, info:'Repéré dans les guides des bars à bières.'},
+  {id:'s6',  name:'Le Garde Fou', addr:'8 rue du Faubourg-National', q:'Gare', lat:48.582672, lon:7.737766, info:'Bières artisanales depuis 2010. Pétanque au sous-sol.'},
+  {id:'s7',  name:'Le Tigre', addr:'5 rue du Faubourg-National', q:'Gare', lat:48.582436, lon:7.737554, info:'Bar à bières, à deux pas du Garde Fou.'},
+  {id:'s8',  name:'Le Cul-Terreux', addr:'10 rue de Molsheim', q:'Gare', lat:48.578050, lon:7.733949, info:'Bar à bières, côté gare.'},
+  {id:'s9',  name:'La Lanterne', addr:'5 rue de la Lanterne', q:'Centre', lat:48.581547, lon:7.747232, info:'Microbrasserie : pressions locales, bouteilles belges, planche de dégustation.'},
+  {id:'s10', name:'Académie de la Bière Petite France', addr:'17 rue Adolphe-Seyboth', q:'Centre', lat:48.581622, lon:7.738994, info:'Grande carte de bières, côté Petite France.'},
+  {id:'s11', name:'Jeannette et les Cycleux', addr:'30 rue des Tonneliers', q:'Centre', lat:48.580706, lon:7.748776, info:'Bar à bières, rue des Tonneliers.'},
+  {id:'s12', name:'Bendorf', addr:'104 rue de la Plaine-des-Bouchers', q:'Neudorf', lat:48.555601, lon:7.737304, info:'Brasserie artisanale, IPA très fruitées. Taproom du jeudi au samedi.'},
+  {id:'s13', name:'Brasserie Roue Libre', addr:'17 route de Vienne', q:'Neudorf', lat:48.572220, lon:7.756199, info:'Brewpub : bières brassées sur place.'}
+];
+
+function defaults(){
+  return {
+    version:1,
+    owner:'Aurore',
+    settings:{sound:1},
+    bars: SEED_BARS.map(b => Object.assign({seed:true}, b)),
+    removedSeeds: [],
+    tastings: [],
+    wishes: [],
+    seen: {}
+  };
+}
+
+/* ---------- stockage ---------- */
+function storageWorks(){ try { const k = '__bmu_test'; localStorage.setItem(k, '1'); localStorage.removeItem(k); return true; } catch(e){ return false; } }
+const canStore = storageWorks();
+let state = null;
+if (canStore) { try { const raw = localStorage.getItem(KEY); if (raw) state = JSON.parse(raw); } catch(e){ state = null; } }
+function repair(s){
+  const d = defaults();
+  if (!s || !Array.isArray(s.tastings)) return d;
+  s.settings = Object.assign(d.settings, s.settings || {});
+  s.bars = Array.isArray(s.bars) ? s.bars : [];
+  s.removedSeeds = Array.isArray(s.removedSeeds) ? s.removedSeeds : [];
+  s.wishes = Array.isArray(s.wishes) ? s.wishes : [];
+  s.seen = s.seen || {};
+  s.owner = s.owner || 'Aurore';
+  // nouveaux bars ajoutés dans une mise à jour de l'appli
+  SEED_BARS.forEach(b => { if (!s.bars.some(x => x.id === b.id) && !s.removedSeeds.includes(b.id)) s.bars.push(Object.assign({seed:true}, b)); });
+  return s;
+}
+state = repair(state);
+function save(){
+  if (!canStore) return;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ toast("Je n'arrive pas à enregistrer. Le stockage est peut-être plein."); }
+}
+
+/* photos (IndexedDB) */
+const memPhotos = new Map();
+let dbPromise = null;
+function db(){
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((res, rej) => {
+    try {
+      const r = indexedDB.open('beermeup', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('photos', {keyPath:'id'});
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    } catch(e){ rej(e); }
+  });
+  return dbPromise;
+}
+function tx(mode, fn){
+  return db().then(d => new Promise((res, rej) => {
+    const t = d.transaction('photos', mode); const st = t.objectStore('photos');
+    const out = fn(st);
+    t.oncomplete = () => res(out && out.result !== undefined ? out.result : undefined);
+    t.onerror = () => rej(t.error);
+  }));
+}
+async function putPhoto(p){ try { await tx('readwrite', st => st.put(p)); } catch(e){ memPhotos.set(p.id, p); } }
+async function delPhoto(id){ memPhotos.delete(id); try { await tx('readwrite', st => st.delete(id)); } catch(e){} }
+async function getPhoto(id){ if (memPhotos.has(id)) return memPhotos.get(id); try { return await tx('readonly', st => st.get(id)); } catch(e){ return null; } }
+async function allPhotos(){ let list = []; try { list = await tx('readonly', st => st.getAll()) || []; } catch(e){} return list.concat([...memPhotos.values()]); }
+async function clearPhotos(){ memPhotos.clear(); try { await tx('readwrite', st => st.clear()); } catch(e){} }
+function compress(file){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const max = 1200, s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('image illisible')); };
+    img.src = url;
+  });
+}
+
+/* ---------- logique ---------- */
+const barById = id => state.bars.find(b => b.id === id) || null;
+const sortedT = () => state.tastings.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0));
+function distinctBeers(list){ return new Set((list || state.tastings).map(t => norm(t.beer))).size; }
+function visitedBarIds(list){ return new Set((list || state.tastings).filter(t => t.barId).map(t => t.barId)); }
+function levelOf(n){ let l = LEVELS[0]; LEVELS.forEach(x => { if (n >= x.min) l = x; }); return l; }
+function nextLevel(n){ return LEVELS.find(x => x.min > n) || null; }
+function placeName(t){ const b = t.barId ? barById(t.barId) : null; return b ? b.name : (t.place || 'Ailleurs'); }
+function stars(n){ n = n || 0; return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
+function ownerOf(){ const n = state.owner || 'Aurore'; return (/^[aeiouyhâéèêîïôûœ]/i.test(n) ? "d'" : 'de ') + n; }
+
+/* ---------- le tampon ---------- */
+function clip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+function stampSvg(t){
+  const st = STYLE[t.style] || STYLE.autre;
+  const c = st.color;
+  const pid = 'p' + t.id;
+  const beer = clip(t.beer, 26).toUpperCase();
+  const place = clip(placeName(t), 30).toUpperCase();
+  const fsTop = Math.max(10, Math.min(19, 236 / Math.max(beer.length, 1)));
+  const fsBot = Math.max(8.5, Math.min(12.5, 210 / Math.max(place.length, 1)));
+  const d = parse(t.date);
+  const date = pad(d.getDate()) + '·' + pad(d.getMonth() + 1) + '·' + String(d.getFullYear()).slice(2);
+  const sub = (st.label.split(',')[0] + (t.service ? ' · ' + (SERVICE[t.service] || '') : '')).toUpperCase();
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(t.beer)}, ${esc(placeName(t))}">
+    <defs>
+      <path id="${pid}t" d="M 38 100 A 62 62 0 0 1 162 100"/>
+      <path id="${pid}b" d="M 26 100 A 74 74 0 0 0 174 100"/>
+    </defs>
+    <g filter="url(#ink)" fill="${c}" stroke="${c}" font-family="'Alfa Slab One',Rockwell,Georgia,serif">
+      <circle cx="100" cy="100" r="92" fill="none" stroke-width="5"/>
+      <circle cx="100" cy="100" r="82" fill="none" stroke-width="1.6"/>
+      <circle cx="100" cy="100" r="47" fill="none" stroke-width="1.6"/>
+      <text stroke="none" font-size="${fsTop.toFixed(1)}" letter-spacing="1" text-anchor="middle"><textPath href="#${pid}t" startOffset="50%">${esc(beer)}</textPath></text>
+      <text stroke="none" font-size="${fsBot.toFixed(1)}" letter-spacing="1.4" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="700"><textPath href="#${pid}b" startOffset="50%">${esc(place)}</textPath></text>
+      <text stroke="none" x="20" y="105" font-size="14" text-anchor="middle">★</text>
+      <text stroke="none" x="180" y="105" font-size="14" text-anchor="middle">★</text>
+      <text stroke="none" x="100" y="86" font-size="6.8" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="700" letter-spacing=".6">${esc(clip(sub, 24))}</text>
+      <text stroke="none" x="100" y="108" font-size="20" text-anchor="middle">${date}</text>
+      <text stroke="none" x="100" y="128" font-size="13" text-anchor="middle" letter-spacing="1">${t.rating ? stars(t.rating) : '·'}</text>
+    </g>
+  </svg>`;
+}
+function rot(t){ return ((hash(t.id) % 19) - 9); }
+function patina(t){
+  const m = monthsBetween(parse(t.date), today());
+  return `opacity:${(1 - Math.min(.28, m * .025)).toFixed(2)};filter:saturate(${(1 - Math.min(.45, m * .035)).toFixed(2)})`;
+}
+
+/* son du tampon (synthétisé, aucun fichier) */
+let actx = null;
+function thump(delay){
+  if (!state.settings.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const t0 = actx.currentTime + (delay || 0);
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150, t0); o.frequency.exponentialRampToValueAtTime(42, t0 + .18);
+    g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.9, t0 + .008); g.gain.exponentialRampToValueAtTime(.0001, t0 + .26);
+    o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + .3);
+    const len = Math.floor(actx.sampleRate * .09), buf = actx.createBuffer(1, len, actx.sampleRate), ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const n = actx.createBufferSource(), f = actx.createBiquadFilter(), ng = actx.createGain();
+    n.buffer = buf; f.type = 'lowpass'; f.frequency.value = 1400; ng.gain.value = .55;
+    n.connect(f).connect(ng).connect(actx.destination); n.start(t0);
+  } catch(e){}
+}
+function playStamp(t, msg, sub){
+  const fx = $('#fx');
+  $('#fxStamp').innerHTML = stampSvg(t);
+  $('#fxStamp').style.setProperty('--r', rot(t) + 'deg');
+  $('#fxMsg').innerHTML = esc(msg) + (sub ? '<small>' + esc(sub) + '</small>' : '');
+  fx.classList.remove('on', 'slam'); fx.hidden = false;
+  thump(.25);
+  requestAnimationFrame(() => { fx.classList.add('on'); setTimeout(() => {
+    fx.classList.add('slam');
+    const p = fx.querySelector('.paper'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+    setTimeout(() => { try { navigator.vibrate && navigator.vibrate(30); } catch(e){} }, 260);
+  }, 20); });
+  clearTimeout(playStamp.timer);
+  playStamp.timer = setTimeout(closeFx, 3200);
+}
+function closeFx(){ const fx = $('#fx'); clearTimeout(playStamp.timer); fx.classList.remove('on', 'slam'); setTimeout(() => { fx.hidden = true; }, 250); }
+$('#fx').addEventListener('click', closeFx);
+
+/* ---------- rendu ---------- */
+let search = '';
+function renderHeader(){
+  const n = distinctBeers();
+  const lv = levelOf(n);
+  $('#sub').textContent = 'Passeport ' + ownerOf() + ' · Strasbourg';
+  $('#chips').innerHTML = `<span class="chip gold">${lv.icon} Exploratrice ${esc(lv.name)}</span>
+    <span class="chip">${plural(n, 'bière')}</span><span class="chip">${plural(visitedBarIds().size, 'bar')}</span>`;
+}
+function renderPasseport(){
+  const n = distinctBeers(), lv = levelOf(n), nx = nextLevel(n);
+  const pct = nx ? Math.round((n - lv.min) / (nx.min - lv.min) * 100) : 100;
+  const list = sortedT();
+  const q = norm(search);
+  const shown = q ? list.filter(t => norm([t.beer, t.brewery, placeName(t), t.comment, (STYLE[t.style] || {}).label].join(' ')).includes(q)) : list;
+  let html = `<div class="card">
+      <div class="level"><div class="medal" aria-hidden="true">${lv.icon}</div>
+        <div style="flex:1;min-width:0"><p class="eyebrow" style="margin:0">Ton statut</p><div class="name">Exploratrice ${esc(lv.name)}</div>
+        <div class="small muted">${nx ? 'Encore ' + plural(nx.min - n, 'bière') + ' différente' + (nx.min - n > 1 ? 's' : '') + ' pour ' + esc(nx.name) + ' ' + nx.icon : 'Tu as tout débloqué. Respect.'}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>
+      </div></div>`;
+  if (!list.length) {
+    html += `<div class="card empty"><div class="e">🎫</div><h2>Ton passeport est vierge</h2>
+      <p>Ta première bière, ton premier tampon. ${plural(state.bars.length, 'bar')} de Strasbourg t’attendent dans l’onglet Bars.</p>
+      <button class="btn primary big" data-act="stamp">🍺 Tamponner ma première bière</button></div>`;
+  } else {
+    html += `<input type="search" class="search" id="search" placeholder="🔎 Une bière, un bar, un souvenir…" value="${esc(search)}" aria-label="Chercher dans le passeport">`;
+    if (!shown.length) html += `<div class="card empty"><p>Rien ne correspond à « ${esc(search)} ».</p></div>`;
+    else html += `<div class="stamps">${shown.map(t => `<button class="cell" data-t="${t.id}" aria-label="${esc(t.beer)}"><div style="width:100%;height:100%;transform:rotate(${rot(t)}deg);${patina(t)}">${stampSvg(t)}</div>${t.photoId ? '<span class="pic">📷</span>' : ''}</button>`).join('')}</div>`;
+  }
+  const tab = $('#tab-passeport');
+  const hadFocus = document.activeElement && document.activeElement.id === 'search';
+  tab.innerHTML = html;
+  const s = $('#search');
+  if (s) { s.oninput = e => { search = e.target.value; renderPasseport(); }; if (hadFocus) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
+}
+
+let barFilter = 'Tous', myPos = null;
+function dist(b){
+  if (!myPos || b.lat == null) return null;
+  const R = 6371e3, r = x => x * Math.PI / 180;
+  const dLat = r(b.lat - myPos.lat), dLon = r(b.lon - myPos.lon);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(r(myPos.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+const fmtDist = m => m == null ? '' : m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+function renderBars(){
+  const visited = visitedBarIds();
+  const quarters = ['Tous'].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], ['Déjà venue', 'À découvrir']);
+  let list = state.bars.slice();
+  if (barFilter === 'Déjà venue') list = list.filter(b => visited.has(b.id));
+  else if (barFilter === 'À découvrir') list = list.filter(b => !visited.has(b.id));
+  else if (barFilter !== 'Tous') list = list.filter(b => b.q === barFilter);
+  if (myPos) list.sort((a, b) => (dist(a) ?? 1e9) - (dist(b) ?? 1e9));
+  else list.sort((a, b) => QUARTIERS.indexOf(a.q) - QUARTIERS.indexOf(b.q) || a.name.localeCompare(b.name, 'fr'));
+  const count = id => state.tastings.filter(t => t.barId === id).length;
+  $('#tab-bars').innerHTML = `
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn ${myPos ? 'primary' : 'ghost'}" data-act="locate">📍 ${myPos ? 'Trié du plus proche' : 'Autour de moi'}</button>
+      <button class="btn ghost" data-act="newbar">＋ Ajouter un bar</button>
+    </div>
+    <div class="filters" role="tablist">${quarters.map(q => `<button class="pill ${q === barFilter ? 'active' : ''}" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+    ${list.length ? `<div class="barlist">${list.map(b => {
+      const n = count(b.id), v = visited.has(b.id);
+      return `<button class="bar ${v ? 'visited' : ''}" data-bar="${b.id}">
+        <span class="dot" aria-hidden="true">${v ? '🍺' : '·'}</span>
+        <span class="b"><strong>${b.fav ? '❤️ ' : ''}${esc(b.name)}</strong>
+          <span class="meta" style="display:block">${esc(b.addr || 'Adresse à compléter')}</span>
+          <span class="tag">${esc(b.q || 'Ailleurs')}${v ? ' · déjà venue · ' + plural(n, 'tampon') : ''}</span></span>
+        ${myPos && b.lat != null ? `<span class="dist">${fmtDist(dist(b))}</span>` : ''}
+      </button>`; }).join('')}</div>` : `<div class="card empty"><p>Aucun bar ici pour l’instant.</p></div>`}
+    <p class="note-src">Les bars de départ ont été trouvés en ligne le ${SEED_DATE}. Vérifie sur place, ça bouge vite.</p>`;
+}
+
+function renderEnvies(){
+  const w = state.wishes.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
+  $('#tab-envies').innerHTML = `<div class="card">
+      <p class="eyebrow">À goûter</p><h2>Ta liste d’envies</h2>
+      <p class="small muted" style="margin-top:0">Une bière dont on t’a parlé, vue sur une carte, conseillée par un barman. Quand tu la goûtes, elle se raye toute seule.</p>
+      <form class="wish-add" id="wishForm"><input type="text" name="beer" placeholder="Le nom de la bière" required autocomplete="off" aria-label="Bière à goûter"><button class="btn primary" type="submit">Ajouter</button></form>
+    </div>
+    <div class="card">${w.length ? `<ul class="wlist">${w.map(x => `<li><div class="b"><div class="t">${esc(x.beer)}</div>${x.where ? `<div class="small muted">${esc(x.where)}</div>` : ''}</div>
+        <button class="btn primary sm" data-wish-stamp="${x.id}">🍺 Goûtée</button><button class="del" data-wish-del="${x.id}" aria-label="Retirer">×</button></li>`).join('')}</ul>`
+      : `<div class="empty"><div class="e">📝</div><p>Ta liste est vide. Note ici la prochaine bière qui te fait de l’œil.</p></div>`}</div>`;
+  $('#wishForm').onsubmit = e => {
+    e.preventDefault(); const v = e.target.beer.value.trim(); if (!v) return;
+    state.wishes.push({id:uid(), beer:v, created:Date.now()}); save(); renderEnvies(); toast('Ajoutée à tes envies 📝');
+  };
+}
+
+let year = null;
+function renderAnnee(){
+  const years = [...new Set(state.tastings.map(t => t.date.slice(0, 4)))].sort().reverse();
+  const cur = String(today().getFullYear());
+  if (!years.includes(cur)) years.unshift(cur);
+  if (!year || !years.includes(year)) year = years[0];
+  const list = state.tastings.filter(t => t.date.startsWith(year));
+  const nAll = distinctBeers();
+  let html = years.length > 1 ? `<div class="filters">${years.map(y => `<button class="pill ${y === year ? 'active' : ''}" data-year="${y}">${y}</button>`).join('')}</div>` : '';
+  html += `<div class="card"><p class="eyebrow">Mon année bière</p><h2>${esc(year)}</h2>`;
+  if (!list.length) {
+    html += `<p class="muted" style="margin:0">Pas encore de tampon en ${esc(year)}. Ton bilan se construit tout seul, à chaque bière.</p></div>`;
+  } else {
+    const rated = list.filter(t => t.rating);
+    const avg = rated.length ? (rated.reduce((s, t) => s + t.rating, 0) / rated.length) : 0;
+    html += `</div><div class="grid2">
+      <div class="stat"><div class="label">Tampons</div><div class="value">${list.length}</div></div>
+      <div class="stat"><div class="label">Bières différentes</div><div class="value">${distinctBeers(list)}</div></div>
+      <div class="stat"><div class="label">Bars visités</div><div class="value">${visitedBarIds(list).size}</div></div>
+      <div class="stat"><div class="label">Note moyenne</div><div class="value">${avg ? avg.toFixed(1).replace('.', ',') + '<span class="gold" style="font-size:18px"> ★</span>' : '·'}</div></div></div>`;
+    const byStyle = {}; list.forEach(t => byStyle[t.style || 'autre'] = (byStyle[t.style || 'autre'] || 0) + 1);
+    const styles = Object.entries(byStyle).sort((a, b) => b[1] - a[1]); const max = styles[0][1];
+    html += `<div class="card"><h3>Tes styles</h3>${styles.map(([k, n]) => `<div class="hbar"><span>${esc((STYLE[k] || STYLE.autre).label)}</span><span class="tr"><span class="fl" style="display:block;width:${Math.round(n / max * 100)}%;background:${(STYLE[k] || STYLE.autre).color}"></span></span><span>${n}</span></div>`).join('')}</div>`;
+    const byBar = {}; list.forEach(t => { const k = placeName(t); byBar[k] = (byBar[k] || 0) + 1; });
+    const qg = Object.entries(byBar).sort((a, b) => b[1] - a[1])[0];
+    const best = rated.slice().sort((a, b) => b.rating - a.rating || b.date.localeCompare(a.date)).slice(0, 3);
+    html += `<div class="card"><h3>Ton QG</h3><p style="margin:0"><strong>${esc(qg[0])}</strong> <span class="muted">· ${plural(qg[1], 'tampon')}</span></p></div>`;
+    if (best.length) html += `<div class="card"><h3>Tes coups de cœur</h3><ul class="top3">${best.map(t => `<li><span><strong>${esc(t.beer)}</strong><br><span class="small muted">${esc(placeName(t))}</span></span><span class="gold">${stars(t.rating)}</span></li>`).join('')}</ul></div>`;
+    const months = Array(12).fill(0); list.forEach(t => months[parse(t.date).getMonth()]++); const mm = Math.max(...months, 1);
+    html += `<div class="card"><h3>Mois par mois</h3><div class="months">${months.map(n => `<div style="height:${Math.round(n / mm * 100)}%;opacity:${n ? 1 : .25}" title="${n}"></div>`).join('')}</div><div class="months-l">${MONTHS_S.map(m => `<span>${m.slice(0, 1).toUpperCase()}</span>`).join('')}</div></div>`;
+  }
+  html += `<div class="card"><h3>Tes trophées</h3><div class="trophies">${LEVELS.map(l => `<div class="trophy ${nAll >= l.min ? '' : 'off'}"><div class="m">${l.icon}</div><div class="n">${esc(l.name)}</div><div class="small muted">${l.min ? l.min + ' bières' : 'départ'}</div></div>`).join('')}</div></div>`;
+  $('#tab-annee').innerHTML = html;
+}
+
+function renderAll(){ renderHeader(); renderPasseport(); renderBars(); renderEnvies(); renderAnnee(); }
+
+/* ---------- feuille ---------- */
+let sheetTimer = null;
+function showSheet(html){ clearTimeout(sheetTimer); const w = $('#sheet'); $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0; w.hidden = false; requestAnimationFrame(() => w.classList.add('open')); }
+function closeSheet(){ const w = $('#sheet'); w.classList.remove('open'); clearTimeout(sheetTimer); sheetTimer = setTimeout(() => { w.hidden = true; $('#sheetBody').innerHTML = ''; }, 200); }
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet' || e.target.closest('[data-close]')) closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#fx').hidden) closeFx(); else if (!$('#sheet').hidden) closeSheet(); } });
+
+function barOptions(sel){
+  const groups = {};
+  state.bars.forEach(b => { const q = b.q || 'Ailleurs'; (groups[q] = groups[q] || []).push(b); });
+  const order = QUARTIERS.concat(Object.keys(groups).filter(q => !QUARTIERS.includes(q)));
+  return `<option value="">Choisis le bar…</option>` + order.filter(q => groups[q]).map(q => `<optgroup label="${esc(q)}">${groups[q].sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(b => `<option value="${b.id}" ${b.id === sel ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</optgroup>`).join('')
+    + `<optgroup label="Autre"><option value="__other" ${sel === '__other' ? 'selected' : ''}>Ailleurs (chez moi, en voyage…)</option><option value="__new">＋ Un bar qui n’est pas dans la liste</option></optgroup>`;
+}
+function quarterOptions(sel){ return QUARTIERS.concat(['Ailleurs']).map(q => `<option ${q === sel ? 'selected' : ''}>${esc(q)}</option>`).join(''); }
+
+/* formulaire de tampon (nouveau ou modification) */
+let pendingPhoto = null, pendingPhotoRemoved = false;
+function openTasting(pre){
+  pre = pre || {};
+  const edit = !!pre.id;
+  pendingPhoto = null; pendingPhotoRemoved = false;
+  const beers = [...new Set(state.tastings.map(t => t.beer).concat(state.wishes.map(w => w.beer)))].sort((a, b) => a.localeCompare(b, 'fr'));
+  const brews = [...new Set(state.tastings.map(t => t.brewery).filter(Boolean))].sort();
+  const barSel = pre.barId || (pre.place ? '__other' : '');
+  showSheet(`<h3>${edit ? '✏️ Modifier le tampon' : '🍺 Tamponner une bière'}</h3>
+    <form id="tForm" autocomplete="off">
+      <label>La bière<input type="text" name="beer" list="dlBeers" required placeholder="Triple Karmeliet, Chouffe…" value="${esc(pre.beer || '')}"></label>
+      <datalist id="dlBeers">${beers.map(b => `<option value="${esc(b)}">`).join('')}</datalist>
+      <label>Brasserie <span class="small">(facultatif)</span><input type="text" name="brewery" list="dlBrew" value="${esc(pre.brewery || '')}"></label>
+      <datalist id="dlBrew">${brews.map(b => `<option value="${esc(b)}">`).join('')}</datalist>
+      <div class="two">
+        <label>Style<select name="style">${STYLES.map(s => `<option value="${s[0]}" ${s[0] === (pre.style || 'blonde') ? 'selected' : ''}>${esc(s[1])}</option>`).join('')}</select></label>
+        <label>Servie en<select name="service">${SERVICES.map(s => `<option value="${s[0]}" ${s[0] === (pre.service || 'pression') ? 'selected' : ''}>${esc(s[1])}</option>`).join('')}</select></label>
+      </div>
+      <label>Où ?<select name="barId" id="tBar">${barOptions(barSel)}</select></label>
+      <label id="tPlaceWrap" ${barSel === '__other' ? '' : 'hidden'}>Le lieu<input type="text" name="place" placeholder="Chez des amis, à Berlin…" value="${esc(pre.place || '')}"></label>
+      <div class="newbar" id="tNewBar" hidden>
+        <label>Nom du bar<input type="text" name="nbName"></label>
+        <label>Adresse <span class="small">(facultatif)</span><input type="text" name="nbAddr"></label>
+        <label>Quartier<select name="nbQ">${quarterOptions('Krutenau')}</select></label>
+        <label class="check"><input type="checkbox" name="nbHere" checked> J’y suis : enregistrer sa position</label>
+      </div>
+      <span class="flabel">Ta note</span>
+      <div class="stars" id="tStars" role="radiogroup" aria-label="Note">${[1,2,3,4,5].map(i => `<button type="button" data-star="${i}" aria-label="${i} sur 5" class="${i <= (pre.rating || 0) ? 'on' : ''}">★</button>`).join('')}</div>
+      <input type="hidden" name="rating" value="${pre.rating || 0}">
+      <label>Date<input type="date" name="date" max="${iso(today())}" value="${esc(pre.date || iso(today()))}" required></label>
+      <label>Ton souvenir <span class="small">(facultatif)</span><textarea name="comment" placeholder="Le goût, avec qui, l’ambiance…">${esc(pre.comment || '')}</textarea></label>
+      <div class="row"><button type="button" class="btn ghost" id="tPhotoBtn">📷 ${pre.photoId ? 'Changer la photo' : 'Ajouter une photo'}</button>${pre.photoId ? '<button type="button" class="btn ghost" id="tPhotoDel">Retirer la photo</button>' : ''}</div>
+      <img id="tPrev" class="prev" alt="" hidden>
+      <div class="sheet-actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">${edit ? 'Enregistrer' : 'Tamponner !'}</button></div>
+    </form>`);
+  const f = $('#tForm');
+  if (pre.photoId) getPhoto(pre.photoId).then(p => { if (p && !pendingPhoto) { $('#tPrev').src = p.data; $('#tPrev').hidden = false; } });
+  $('#tBar').onchange = e => { $('#tPlaceWrap').hidden = e.target.value !== '__other'; $('#tNewBar').hidden = e.target.value !== '__new'; if (e.target.value === '__new') f.nbName.focus(); };
+  $('#tStars').onclick = e => { const b = e.target.closest('[data-star]'); if (!b) return; let v = +b.dataset.star; if (+f.rating.value === v) v = 0; f.rating.value = v; $('#tStars').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.star <= v)); };
+  $('#tPhotoBtn').onclick = () => $('#photoInput').click();
+  if ($('#tPhotoDel')) $('#tPhotoDel').onclick = () => { pendingPhoto = null; pendingPhotoRemoved = true; $('#tPrev').hidden = true; $('#tPhotoDel').remove(); };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const v = Object.fromEntries(new FormData(f).entries());
+    const beer = String(v.beer || '').trim(); if (!beer) return;
+    let barId = v.barId || null, place = '';
+    if (barId === '__other') { barId = null; place = String(v.place || '').trim(); }
+    if (barId === '__new') {
+      const name = String(v.nbName || '').trim();
+      if (!name) { toast('Donne un nom au nouveau bar'); f.nbName.focus(); return; }
+      const nb = {id:uid(), name, addr:String(v.nbAddr || '').trim(), q:v.nbQ || 'Ailleurs', lat:null, lon:null};
+      state.bars.push(nb); barId = nb.id;
+      if (v.nbHere) locateBar(nb);
+    }
+    const t = edit ? state.tastings.find(x => x.id === pre.id) : {id:uid(), created:Date.now()};
+    if (!t) return;
+    const before = distinctBeers();
+    Object.assign(t, {beer, brewery:String(v.brewery || '').trim(), style:v.style, service:v.service, barId, place, rating:+v.rating || 0, date:v.date || iso(today()), comment:String(v.comment || '').trim()});
+    if (pendingPhoto) { const old = t.photoId; t.photoId = uid(); await putPhoto({id:t.photoId, data:pendingPhoto, date:t.date}); if (old) delPhoto(old); }
+    else if (pendingPhotoRemoved && t.photoId) { delPhoto(t.photoId); delete t.photoId; }
+    if (!edit) state.tastings.push(t);
+    // rayer des envies
+    const crossed = state.wishes.filter(w => norm(w.beer) === norm(beer));
+    if (crossed.length) state.wishes = state.wishes.filter(w => norm(w.beer) !== norm(beer));
+    save(); closeSheet(); renderAll();
+    if (edit) { toast('Tampon modifié'); return; }
+    const after = distinctBeers(), lvB = levelOf(before), lvA = levelOf(after);
+    const firstHere = barId && state.tastings.filter(x => x.barId === barId).length === 1;
+    let msg = 'Tampon n°' + state.tastings.length, sub = '';
+    if (lvA !== lvB) { msg = lvA.icon + ' Exploratrice ' + lvA.name + ' !'; sub = 'Nouveau statut débloqué avec ' + plural(after, 'bière') + ' différente' + (after > 1 ? 's' : '') + '.'; }
+    else if (after > before && after === 1) sub = 'Ta toute première bière. Le passeport est lancé.';
+    else if (firstHere) sub = 'Premier passage à ' + placeName(t) + '.';
+    else if (after === before) sub = 'Une bière que tu connaissais déjà.';
+    else sub = 'Une nouvelle bière au compteur.';
+    if (crossed.length) sub += ' Rayée de tes envies.';
+    playStamp(t, msg, sub);
+  };
+}
+$('#photoInput').addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0]; e.target.value = ''; if (!file) return;
+  try { pendingPhoto = await compress(file); pendingPhotoRemoved = false; const p = $('#tPrev'); if (p) { p.src = pendingPhoto; p.hidden = false; } }
+  catch(err){ toast("Je n'arrive pas à lire cette image."); }
+});
+
+function locateBar(b, done){
+  if (!navigator.geolocation) { toast('Position indisponible sur cet appareil'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    b.lat = +pos.coords.latitude.toFixed(6); b.lon = +pos.coords.longitude.toFixed(6); save(); renderBars(); if (done) done(); toast('Position du bar enregistrée 📍');
+  }, () => toast("Je n'ai pas eu accès à ta position."), {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
+}
+
+/* fiche d'un tampon */
+async function openDetail(id){
+  const t = state.tastings.find(x => x.id === id); if (!t) return;
+  const b = t.barId ? barById(t.barId) : null;
+  showSheet(`<div style="transform:rotate(${rot(t)}deg)" class="detail-stamp">${stampSvg(t)}</div>
+    <h3 style="text-align:center">${esc(t.beer)}</h3>
+    <img id="dImg" class="prev" alt="" hidden style="margin:0 0 12px">
+    ${t.comment ? `<div class="souvenir">${esc(t.comment)}</div>` : ''}
+    <ul class="facts">
+      ${t.brewery ? `<li><span>Brasserie</span><span>${esc(t.brewery)}</span></li>` : ''}
+      <li><span>Style</span><span>${esc((STYLE[t.style] || STYLE.autre).label)}</span></li>
+      <li><span>Servie en</span><span>${esc(SERVICE[t.service] || '·')}</span></li>
+      <li><span>Où</span><span>${b ? `<button class="link" data-bar="${b.id}">${esc(b.name)}</button>` : esc(placeName(t))}</span></li>
+      <li><span>Quand</span><span>${fmtDay(parse(t.date))}</span></li>
+      <li><span>Ta note</span><span class="gold">${t.rating ? stars(t.rating) : 'pas notée'}</span></li>
+    </ul>
+    <div class="sheet-actions"><button class="btn danger" id="dDel">Supprimer</button><button class="btn ghost" id="dEdit">Modifier</button><button class="btn primary" data-close>Fermer</button></div>`);
+  if (t.photoId) { const p = await getPhoto(t.photoId); if (p && $('#dImg')) { $('#dImg').src = p.data; $('#dImg').hidden = false; } }
+  $('#dEdit').onclick = () => openTasting(Object.assign({}, t));
+  $('#dDel').onclick = () => {
+    const i = state.tastings.findIndex(x => x.id === id); if (i < 0) return;
+    const [removed] = state.tastings.splice(i, 1); save(); closeSheet(); renderAll();
+    let undone = false;
+    toast('Tampon supprimé', () => { undone = true; state.tastings.push(removed); save(); renderAll(); });
+    setTimeout(() => { if (!undone && removed.photoId) delPhoto(removed.photoId); }, 5600);
+  };
+}
+
+/* fiche d'un bar */
+function mapsLinks(b){
+  const full = [b.name, b.addr, 'Strasbourg'].filter(Boolean).join(', ');
+  const apple = 'https://maps.apple.com/?q=' + encodeURIComponent(b.name) + (b.lat != null ? '&ll=' + b.lat + ',' + b.lon : '&address=' + encodeURIComponent(full));
+  const google = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(!b.addr && b.lat != null ? b.lat + ',' + b.lon : full);
+  return {apple, google};
+}
+function openBar(id){
+  const b = barById(id); if (!b) return;
+  const here = state.tastings.filter(t => t.barId === id).sort((a, c) => c.date.localeCompare(a.date));
+  const L = mapsLinks(b);
+  const d = myPos && b.lat != null ? fmtDist(dist(b)) : '';
+  showSheet(`<p class="eyebrow">${esc(b.q || 'Ailleurs')}${d ? ' · à ' + d : ''}</p>
+    <h3>${esc(b.name)}</h3>
+    <p class="muted" style="margin:0 0 6px">${esc(b.addr || 'Adresse à compléter')}</p>
+    ${b.info ? `<p class="small" style="margin:0 0 12px">${esc(b.info)}</p>` : ''}
+    <div class="row" style="margin-bottom:10px">
+      <a class="btn ghost sm" href="${esc(L.apple)}" target="_blank" rel="noopener">🗺️ Plans</a>
+      <a class="btn ghost sm" href="${esc(L.google)}" target="_blank" rel="noopener">📍 Google</a>
+      <button class="btn ghost sm" id="bFav">${b.fav ? '❤️ Favori' : '🤍 Favori'}</button>
+    </div>
+    <button class="btn primary big" id="bStamp">🍺 Tamponner ici</button>
+    <p class="section-title" style="margin-left:0">${here.length ? 'Tes tampons ici' : 'Pas encore venue'}</p>
+    ${here.length ? `<ul class="top3">${here.map(t => `<li><span><button class="link" data-t="${t.id}">${esc(t.beer)}</button><br><span class="small muted">${fmtDay(parse(t.date))}</span></span><span class="gold">${t.rating ? stars(t.rating) : ''}</span></li>`).join('')}</ul>` : `<p class="small muted" style="margin-top:0">Ton premier tampon ici t’attend.</p>`}
+    <label style="margin-top:16px">Mon avis sur le bar<textarea id="bNote" placeholder="L’ambiance, le barman, la meilleure table…">${esc(b.mynote || '')}</textarea></label>
+    <div class="stack">
+      <button class="btn ghost" id="bEdit">✏️ Modifier le bar</button>
+      <button class="btn danger" id="bDel">Retirer ce bar</button>
+    </div>`);
+  $('#bStamp').onclick = () => openTasting({barId:id});
+  $('#bFav').onclick = () => { b.fav = !b.fav; save(); renderBars(); $('#bFav').textContent = b.fav ? '❤️ Favori' : '🤍 Favori'; };
+  $('#bNote').onchange = e => { b.mynote = e.target.value.trim(); save(); toast('Avis enregistré'); };
+  $('#bEdit').onclick = () => openBarForm(b);
+  $('#bDel').onclick = () => {
+    if (!confirm('Retirer « ' + b.name + ' » de ta liste ? Tes tampons sont gardés.')) return;
+    state.tastings.forEach(t => { if (t.barId === id) { t.barId = null; t.place = b.name; } });
+    state.bars = state.bars.filter(x => x.id !== id);
+    if (b.seed && !state.removedSeeds.includes(id)) state.removedSeeds.push(id);
+    save(); closeSheet(); renderAll(); toast('Bar retiré');
+  };
+}
+function openBarForm(b){
+  const edit = !!b;
+  b = b || {name:'', addr:'', q:'Krutenau'};
+  showSheet(`<h3>${edit ? '✏️ Modifier le bar' : '＋ Ajouter un bar'}</h3>
+    <form id="bForm" autocomplete="off">
+      <label>Nom<input type="text" name="name" required value="${esc(b.name)}"></label>
+      <label>Adresse <span class="small">(facultatif)</span><input type="text" name="addr" value="${esc(b.addr || '')}"></label>
+      <label>Quartier<select name="q">${quarterOptions(b.q || 'Krutenau')}</select></label>
+      <label class="check"><input type="checkbox" name="here" ${edit ? '' : 'checked'}> J’y suis : enregistrer sa position</label>
+      <div class="sheet-actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">Enregistrer</button></div>
+    </form>`);
+  $('#bForm').onsubmit = e => {
+    e.preventDefault(); const v = Object.fromEntries(new FormData(e.target).entries());
+    const name = String(v.name || '').trim(); if (!name) return;
+    const target = edit ? b : {id:uid(), lat:null, lon:null};
+    Object.assign(target, {name, addr:String(v.addr || '').trim(), q:v.q});
+    if (!edit) state.bars.push(target);
+    save(); renderAll(); closeSheet(); toast(edit ? 'Bar modifié' : 'Bar ajouté 📍');
+    if (v.here) locateBar(target);
+  };
+}
+
+/* réglages */
+function openSettings(){
+  showSheet(`<h3>⚙️ Réglages</h3>
+    <form id="sForm">
+      <label>Ton prénom<input type="text" name="owner" value="${esc(state.owner)}"></label>
+      <label>Son du tampon<select name="sound"><option value="1" ${state.settings.sound ? 'selected' : ''}>Oui</option><option value="0" ${state.settings.sound ? '' : 'selected'}>Non</option></select></label>
+      <div class="sheet-actions"><button type="button" class="btn ghost" data-close>Fermer</button><button type="submit" class="btn primary">Enregistrer</button></div>
+    </form>
+    <div class="stack">
+      <p class="small muted" style="margin:0">Ton passeport est rangé sur ce téléphone, nulle part ailleurs. Télécharge une sauvegarde de temps en temps : elle contient aussi les photos.</p>
+      <button class="btn ghost" id="btnExport">⬇️ Télécharger une sauvegarde</button>
+      <button class="btn ghost" id="btnImport">⬆️ Restaurer une sauvegarde</button>
+      <button class="btn danger" id="btnReset">Tout effacer</button>
+      <p class="small muted" style="margin:0">À consommer avec modération. L’abus d’alcool est dangereux pour la santé.</p>
+    </div>`);
+  $('#sForm').onsubmit = e => { e.preventDefault(); const v = Object.fromEntries(new FormData(e.target).entries()); state.owner = String(v.owner || '').trim() || 'Aurore'; state.settings.sound = v.sound === '1' ? 1 : 0; save(); renderAll(); closeSheet(); toast('Réglages enregistrés'); };
+  $('#btnExport').onclick = exportData;
+  $('#btnImport').onclick = () => $('#importInput').click();
+  $('#btnReset').onclick = resetAll;
+}
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+async function exportData(){
+  const photos = await allPhotos();
+  download(new Blob([JSON.stringify({app:'beermeup', exported:new Date().toISOString(), state, photos})], {type:'application/json'}), 'beer-me-up-sauvegarde-' + iso(today()) + '.json');
+  toast('Sauvegarde téléchargée');
+}
+$('#importInput').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (data.app !== 'beermeup' || !data.state || !Array.isArray(data.state.tastings)) throw new Error('format');
+    if (!confirm('Remplacer ton passeport actuel par cette sauvegarde ?')) return;
+    state = repair(data.state); save(); await clearPhotos(); for (const p of (data.photos || [])) await putPhoto(p);
+    closeSheet(); renderAll(); toast('Sauvegarde restaurée 🍺');
+  } catch(err){ toast("Ce fichier n'est pas une sauvegarde de Beer Me Up."); }
+});
+async function resetAll(){
+  if (!confirm('Tout effacer et repartir de zéro ? Pense à télécharger une sauvegarde avant.')) return;
+  state = defaults(); save(); await clearPhotos(); closeSheet(); renderAll(); toast('Tout est remis à zéro');
+}
+$('#btnSettings').onclick = openSettings;
+
+/* toast */
+let toastTimer = null;
+function toast(msg, undo){
+  const t = $('#toast'); t.innerHTML = ''; const span = document.createElement('span'); span.textContent = msg; t.appendChild(span);
+  if (undo) { const b = document.createElement('button'); b.textContent = 'Annuler'; b.onclick = () => { undo(); t.classList.remove('show'); }; t.appendChild(b); }
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 5000 : 2800);
+}
+
+/* clics délégués */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act],[data-t],[data-bar],[data-q],[data-year],[data-wish-stamp],[data-wish-del]');
+  if (!el) return;
+  if (el.dataset.act === 'stamp') openTasting();
+  else if (el.dataset.act === 'newbar') openBarForm();
+  else if (el.dataset.act === 'locate') {
+    if (!navigator.geolocation) { toast('Position indisponible sur cet appareil'); return; }
+    toast('Je cherche où tu es…');
+    navigator.geolocation.getCurrentPosition(p => { myPos = {lat:p.coords.latitude, lon:p.coords.longitude}; renderBars(); toast('Bars triés du plus proche 📍'); },
+      () => toast("Je n'ai pas eu accès à ta position."), {enableHighAccuracy:false, timeout:12000, maximumAge:120000});
+  }
+  else if (el.dataset.t) openDetail(el.dataset.t);
+  else if (el.dataset.bar) openBar(el.dataset.bar);
+  else if (el.dataset.q) { barFilter = el.dataset.q; renderBars(); }
+  else if (el.dataset.year) { year = el.dataset.year; renderAnnee(); }
+  else if (el.dataset.wishStamp) { const w = state.wishes.find(x => x.id === el.dataset.wishStamp); if (w) openTasting({beer:w.beer}); }
+  else if (el.dataset.wishDel) {
+    const i = state.wishes.findIndex(x => x.id === el.dataset.wishDel); if (i < 0) return;
+    const [w] = state.wishes.splice(i, 1); save(); renderEnvies();
+    toast('Retirée de tes envies', () => { state.wishes.push(w); save(); renderEnvies(); });
+  }
+});
+$('#btnStamp').onclick = () => openTasting();
+
+/* onglets */
+document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.nav[data-tab]').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === 'tab-' + b.dataset.tab));
+  window.scrollTo(0, 0);
+});
+
+/* démarrage */
+if (!canStore) {
+  const bn = $('#banner'); bn.hidden = false;
+  bn.textContent = "⚠️ Ici, Beer Me Up ne peut rien retenir. Ouvre l'appli depuis son adresse ou son icône pour que ton passeport soit sauvegardé.";
+}
+save();
+renderAll();
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
+})();
+</script>
+</body>
+</html>
