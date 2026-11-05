@@ -121,6 +121,14 @@ h3{font-family:var(--display);font-weight:400;font-size:20px;line-height:1.2;mar
 .bar .meta{font-size:13px;color:var(--muted);margin-top:2px}
 .bar .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--amber-deep);margin-top:4px}
 .bar .dist{flex:none;font-size:13px;font-weight:600;color:var(--muted)}
+.hh{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px}
+.hh.on{background:var(--amber);color:var(--on-amber)}
+.hh.soon{background:var(--amber-soft);color:var(--amber-deep)}
+.hhbox{background:var(--amber-soft);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.hhbox .eyebrow{color:var(--amber-deep)}
+.hhbox .now{font-weight:700;margin:0 0 6px}
+.hhbox ul{margin:0 0 6px;padding-left:18px;font-size:14px}
+.hhbox p{margin:0 0 4px;font-size:14px}
 .note-src{font-size:12px;color:var(--muted);margin:14px 4px 0;text-align:center}
 
 /* envies */
@@ -318,20 +326,42 @@ const LEVELS = [
 ];
 const SEED_DATE = '5 novembre 2026';
 const SEED_BARS = [
-  {id:'s1',  name:'Académie de la Bière Krutenau', addr:'6 rue Sainte-Catherine', q:'Krutenau', lat:48.580207, lon:7.757185, info:'Une vingtaine de bières à la pression et plus de 75 en bouteille.'},
-  {id:'s2',  name:'Au Brasseur', addr:'22 rue des Veaux', q:'Krutenau', lat:48.582523, lon:7.755326, info:'Brasse ses propres bières : blonde, ambrée, brune. Ambiance étudiante.'},
-  {id:'s3',  name:'La Victoire', addr:'24 quai des Pêcheurs', q:'Krutenau', lat:48.584019, lon:7.758870, info:'Microbrasserie à l’étage : demande la bière brassée sur place.'},
-  {id:'s4',  name:'Le Local', addr:'rue de l’Abreuvoir', q:'Krutenau', lat:48.579126, lon:7.760381, info:'Bières craft, dont des artisanales alsaciennes. Concerts.'},
-  {id:'s5',  name:'Le Terminal', addr:'6 place Saint-Nicolas-aux-Ondes', q:'Krutenau', lat:48.581290, lon:7.761777, info:'Repéré dans les guides des bars à bières.'},
-  {id:'s6',  name:'Le Garde Fou', addr:'8 rue du Faubourg-National', q:'Gare', lat:48.582672, lon:7.737766, info:'Bières artisanales depuis 2010. Pétanque au sous-sol.'},
-  {id:'s7',  name:'Le Tigre', addr:'5 rue du Faubourg-National', q:'Gare', lat:48.582436, lon:7.737554, info:'Bar à bières, à deux pas du Garde Fou.'},
-  {id:'s8',  name:'Le Cul-Terreux', addr:'10 rue de Molsheim', q:'Gare', lat:48.578050, lon:7.733949, info:'Bar à bières, côté gare.'},
-  {id:'s9',  name:'La Lanterne', addr:'5 rue de la Lanterne', q:'Centre', lat:48.581547, lon:7.747232, info:'Microbrasserie : pressions locales, bouteilles belges, planche de dégustation.'},
-  {id:'s10', name:'Académie de la Bière Petite France', addr:'17 rue Adolphe-Seyboth', q:'Centre', lat:48.581622, lon:7.738994, info:'Grande carte de bières, côté Petite France.'},
-  {id:'s11', name:'Jeannette et les Cycleux', addr:'30 rue des Tonneliers', q:'Centre', lat:48.580706, lon:7.748776, info:'Bar à bières, rue des Tonneliers.'},
-  {id:'s12', name:'Bendorf', addr:'104 rue de la Plaine-des-Bouchers', q:'Neudorf', lat:48.555601, lon:7.737304, info:'Brasserie artisanale, IPA très fruitées. Taproom du jeudi au samedi.'},
-  {id:'s13', name:'Brasserie Roue Libre', addr:'17 route de Vienne', q:'Neudorf', lat:48.572220, lon:7.756199, info:'Brewpub : bières brassées sur place.'}
+  {id:'s1',  name:'Académie de la Bière Krutenau', addr:'6 rue Sainte-Catherine', q:'Krutenau', lat:48.580207, lon:7.757185, info:'Une vingtaine de bières à la pression et plus de 75 en bouteille.',
+    hh:null, hhNote:'Un happy hour « chaque soir » selon Privateaser, mais sans horaires précis. Demande au comptoir.'},
+  {id:'s2',  name:'Au Brasseur', addr:'22 rue des Veaux', q:'Krutenau', lat:48.582523, lon:7.755326, info:'Brasse ses propres bières : blonde, ambrée, brune. Ambiance étudiante.',
+    hh:[{d:'12347', f:'17:00', t:'19:00'}, {d:'12347', f:'22:00', t:'23:00'}, {d:'56', f:'17:00', t:'19:00'}], hhPrice:'Blonde maison 50 cl : 2,90 € au lieu de 5,10 €'},
+  {id:'s3',  name:'La Victoire', addr:'24 quai des Pêcheurs', q:'Krutenau', lat:48.584019, lon:7.758870, info:'Microbrasserie à l’étage : demande la bière brassée sur place.',
+    hh:null, hhNote:'Pas d’happy hour trouvé en ligne.'},
+  {id:'s4',  name:'Le Local', addr:'3 rue de l’Abreuvoir', q:'Krutenau', lat:48.578759, lon:7.759813, info:'Bières craft, dont des artisanales alsaciennes. Concerts.',
+    hh:[{d:'1234', f:'17:00', t:'19:30'}, {d:'56', f:'17:00', t:'19:00'}], hhPrice:'Pinte 50 cl dès 3 € au lieu de 5 €'},
+  {id:'s5',  name:'Le Terminal', addr:'6 place Saint-Nicolas-aux-Ondes', q:'Krutenau', lat:48.581290, lon:7.761777, info:'Bar à bières, ouvert tard le week-end.',
+    hh:[{d:'123456', f:'16:00', t:'21:00'}], hhPrice:'Pinte 50 cl : 3,50 € au lieu de 4,50 €', hhNote:'Un avis de 2021 dit que le bar ne faisait plus ses prix happy hour. À vérifier.'},
+  {id:'s6',  name:'Le Garde Fou', addr:'8 rue du Faubourg-National', q:'Gare', lat:48.582672, lon:7.737766, info:'Bières artisanales depuis 2010. Pétanque au sous-sol.',
+    hh:[{d:'123456', f:'17:00', t:'20:00'}], hhPrice:'Meteor Pils 50 cl : 4 € au lieu de 4,80 €'},
+  {id:'s7',  name:'Le Tigre', addr:'5 rue du Faubourg-National', q:'Gare', lat:48.582436, lon:7.737554, info:'Brasserie et bar, à deux pas du Garde Fou.',
+    hh:[{d:'1234567', f:'17:00', t:'20:30'}], hhPrice:'Pinte dès 3,90 €', hhNote:'Les sources ne sont pas d’accord : 16h30 à 19h pour l’une, 17h à 20h30 pour l’autre.'},
+  {id:'s8',  name:'Le Cul-Terreux', addr:'10 rue de Molsheim', q:'Gare', lat:48.578050, lon:7.733949, info:'Bar à bières, côté gare. Fermé le dimanche.',
+    hh:[{d:'123456', f:'16:30', t:'20:00'}], hhPrice:'Meteor Pils 50 cl : 5 € hors happy hour'},
+  {id:'s14', name:'Au Coin des Kneckes', addr:'34 rue de la Course', q:'Gare', lat:48.583067, lon:7.735433, info:'Le petit frère du Troquet des Kneckes : bar de quartier 100 % alsacien, baby-foot, jeux.',
+    hh:[{d:'1234567', f:'17:00', t:'20:00'}], hhPrice:'Bière du moment 50 cl dès 4,90 €'},
+  {id:'s15', name:'Abattoir Café', addr:'1 quai Charles-Altorffer', q:'Gare', lat:48.581592, lon:7.737702, info:'Grande terrasse au bord de l’eau. Ouvert jusqu’à 4 h le week-end.',
+    hh:[{d:'1234567', f:'16:30', t:'18:30'}], hhPrice:'Fischer Tradition 50 cl : 3,30 €. Fischer Dorelei : 4 € au lieu de 7,50 €'},
+  {id:'s9',  name:'La Lanterne', addr:'5 rue de la Lanterne', q:'Centre', lat:48.581547, lon:7.747232, info:'Microbrasserie : pressions locales, bouteilles belges, planche de dégustation.',
+    hh:[{d:'12347', f:'16:00', t:'19:00'}], hhPrice:'Blonde 50 cl : 3,50 € au lieu de 6,50 €'},
+  {id:'s10', name:'Académie de la Bière Petite France', addr:'17 rue Adolphe-Seyboth', q:'Centre', lat:48.581622, lon:7.738994, info:'Grande carte de bières, côté Petite France. Ouvert jusqu’à 4 h.',
+    hh:[{d:'1234567', f:'17:00', t:'19:00'}], hhPrice:'Bière 50 cl : 5 € au lieu de 8 €'},
+  {id:'s11', name:'Jeannette et les Cycleux', addr:'30 rue des Tonneliers', q:'Centre', lat:48.580706, lon:7.748776, info:'Bar à bières, rue des Tonneliers.',
+    hh:[{d:'12345', f:'17:00', t:'20:00'}], hhPrice:'Mutzig 50 cl : 4,30 € au lieu de 6,30 €'},
+  {id:'s16', name:'L’Artichaut', addr:'56 Grand’Rue', q:'Centre', lat:48.582176, lon:7.741449, info:'Bar de la Grand’Rue, ouvert tous les jours dès 16 h.',
+    hh:[{d:'1234567', f:'16:00', t:'19:00'}], hhPrice:'Pinte 50 cl : 5 € au lieu de 7 €', hhNote:'Le bar annonce aussi 17h à 19h : arrive plutôt après 17 h pour être sûre.'},
+  {id:'s17', name:'Delirium', addr:'5 quai de Paris', q:'Centre', lat:48.584607, lon:7.742291, info:'Bar à bières belges avec piste de danse. Soirées latines le vendredi et le dimanche.',
+    hh:[{d:'1234567', f:'17:00', t:'20:00'}], hhPrice:'La plupart des 50 cl : 4 € au lieu de 7 €'},
+  {id:'s12', name:'Bendorf', addr:'104 rue de la Plaine-des-Bouchers', q:'Neudorf', lat:48.555601, lon:7.737304, info:'Brasserie artisanale, IPA très fruitées. Taproom du jeudi au samedi.',
+    hh:null, hhNote:'Pas d’happy hour trouvé en ligne.'},
+  {id:'s13', name:'Brasserie Roue Libre', addr:'17 route de Vienne', q:'Neudorf', lat:48.572220, lon:7.756199, info:'Brewpub : bières brassées sur place. Fermé le lundi.',
+    hh:[{d:'234567', f:'16:30', t:'19:30'}], hhPrice:'Bière artisanale 50 cl : 5 à 6,50 € au lieu de 6 à 7,50 €'}
 ];
+const SEED_FIELDS = ['info', 'hh', 'hhPrice', 'hhNote'];
 
 function defaults(){
   return {
@@ -362,6 +392,8 @@ function repair(s){
   s.owner = s.owner || 'Aurore';
   // nouveaux bars ajoutés dans une mise à jour de l'appli
   SEED_BARS.forEach(b => { if (!s.bars.some(x => x.id === b.id) && !s.removedSeeds.includes(b.id)) s.bars.push(Object.assign({seed:true}, b)); });
+  // infos tenues à jour par l'appli (happy hours, description)
+  s.bars.forEach(b => { const sd = SEED_BARS.find(x => x.id === b.id); if (sd) (b.edited ? SEED_FIELDS : SEED_FIELDS.concat(['name', 'addr', 'q', 'lat', 'lon'])).forEach(k => { if (sd[k] === undefined) delete b[k]; else b[k] = sd[k]; }); });
   return s;
 }
 state = repair(state);
@@ -544,15 +576,47 @@ function dist(b){
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(r(myPos.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
+const DAYS_L = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const toMin = s => { const p = s.split(':').map(Number); return p[0] * 60 + p[1]; };
+const fmtH = s => { const p = s.split(':'); return (+p[0]) + 'h' + (p[1] !== '00' ? p[1] : ''); };
+const dow = d => ((d || new Date()).getDay() + 6) % 7 + 1;
+function hhStatus(b, now){
+  if (!b.hh || !b.hh.length) return null;
+  now = now || new Date(); const day = String(dow(now)); const m = now.getHours() * 60 + now.getMinutes();
+  const todays = b.hh.filter(w => w.d.includes(day)).sort((a, c) => toMin(a.f) - toMin(c.f));
+  const on = todays.find(w => m >= toMin(w.f) && m < toMin(w.t));
+  if (on) return {on:true, w:on};
+  const next = todays.find(w => toMin(w.f) > m);
+  if (next) return {soon:true, w:next};
+  return {none:true, today:todays.length > 0};
+}
+function hhLabel(st){
+  if (!st) return '';
+  if (st.on) return '🍻 Happy hour jusqu’à ' + fmtH(st.w.t);
+  if (st.soon) return '🍻 Happy hour à ' + fmtH(st.w.f);
+  return st.today ? 'Happy hour fini pour aujourd’hui' : 'Pas d’happy hour aujourd’hui';
+}
+function fmtDays(d){
+  if (d === '1234567') return 'Tous les jours';
+  const set = d.split('').map(Number), n = set.length;
+  for (let s0 = 1; s0 <= 7; s0++) {
+    const seq = Array.from({length:n}, (_, i) => ((s0 - 1 + i) % 7) + 1);
+    if (seq.every(x => set.includes(x)) && n > 1) return 'Du ' + DAYS_L[seq[0] - 1] + ' au ' + DAYS_L[seq[n - 1] - 1];
+  }
+  const l = set.map(x => DAYS_L[x - 1]); l[0] = l[0][0].toUpperCase() + l[0].slice(1); return l.join(', ');
+}
 const fmtDist = m => m == null ? '' : m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
 function renderBars(){
   const visited = visitedBarIds();
-  const quarters = ['Tous'].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], ['Déjà venue', 'À découvrir']);
+  const quarters = ['Tous', '🍻 Happy hour'].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], ['Déjà venue', 'À découvrir']);
   let list = state.bars.slice();
-  if (barFilter === 'Déjà venue') list = list.filter(b => visited.has(b.id));
+  const now = new Date();
+  if (barFilter === '🍻 Happy hour') list = list.filter(b => { const st = hhStatus(b, now); return st && (st.on || st.soon); });
+  else if (barFilter === 'Déjà venue') list = list.filter(b => visited.has(b.id));
   else if (barFilter === 'À découvrir') list = list.filter(b => !visited.has(b.id));
   else if (barFilter !== 'Tous') list = list.filter(b => b.q === barFilter);
   if (myPos) list.sort((a, b) => (dist(a) ?? 1e9) - (dist(b) ?? 1e9));
+  else if (barFilter === '🍻 Happy hour') { const k = b => { const st = hhStatus(b, now); return st.on ? toMin(st.w.t) - 2000 : toMin(st.w.f); }; list.sort((a, b) => k(a) - k(b)); }
   else list.sort((a, b) => QUARTIERS.indexOf(a.q) - QUARTIERS.indexOf(b.q) || a.name.localeCompare(b.name, 'fr'));
   const count = id => state.tastings.filter(t => t.barId === id).length;
   $('#tab-bars').innerHTML = `
@@ -567,10 +631,11 @@ function renderBars(){
         <span class="dot" aria-hidden="true">${v ? '🍺' : '·'}</span>
         <span class="b"><strong>${b.fav ? '❤️ ' : ''}${esc(b.name)}</strong>
           <span class="meta" style="display:block">${esc(b.addr || 'Adresse à compléter')}</span>
-          <span class="tag">${esc(b.q || 'Ailleurs')}${v ? ' · déjà venue · ' + plural(n, 'tampon') : ''}</span></span>
+          <span class="tag">${esc(b.q || 'Ailleurs')}${v ? ' · déjà venue · ' + plural(n, 'tampon') : ''}</span>
+          ${(() => { const st = hhStatus(b, now); return st && (st.on || st.soon) ? `<span class="hh ${st.on ? 'on' : 'soon'}" style="display:table">${hhLabel(st)}</span>` : ''; })()}</span>
         ${myPos && b.lat != null ? `<span class="dist">${fmtDist(dist(b))}</span>` : ''}
-      </button>`; }).join('')}</div>` : `<div class="card empty"><p>Aucun bar ici pour l’instant.</p></div>`}
-    <p class="note-src">Les bars de départ ont été trouvés en ligne le ${SEED_DATE}. Vérifie sur place, ça bouge vite.</p>`;
+      </button>`; }).join('')}</div>` : `<div class="card empty"><p>${barFilter === '🍻 Happy hour' ? 'Plus d’happy hour en vue pour aujourd’hui. Demain, ça recommence 🍻' : 'Aucun bar ici pour l’instant.'}</p></div>`}
+    <p class="note-src">Bars et happy hours trouvés en ligne le ${SEED_DATE} (Schlouk Map, Privateaser). Vérifie sur place, ça bouge vite.</p>`;
 }
 
 function renderEnvies(){
@@ -769,6 +834,16 @@ function mapsLinks(b){
   const google = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(!b.addr && b.lat != null ? b.lat + ',' + b.lon : full);
   return {apple, google};
 }
+function hhBox(b){
+  if (!b.hh && !b.hhNote) return '';
+  const st = hhStatus(b);
+  return `<div class="hhbox"><p class="eyebrow">Happy hour</p>
+    ${st ? `<p class="now">${hhLabel(st)}</p>` : ''}
+    ${b.hh ? `<ul>${b.hh.map(w => `<li>${fmtDays(w.d)} · ${fmtH(w.f)} → ${fmtH(w.t)}</li>`).join('')}</ul>` : ''}
+    ${b.hhPrice ? `<p>${esc(b.hhPrice)}</p>` : ''}
+    ${b.hhNote ? `<p class="muted">${esc(b.hhNote)}</p>` : ''}
+    ${b.seed ? `<p class="small muted" style="margin:6px 0 0">Trouvé en ligne le ${SEED_DATE}, à vérifier sur place.</p>` : ''}</div>`;
+}
 function openBar(id){
   const b = barById(id); if (!b) return;
   const here = state.tastings.filter(t => t.barId === id).sort((a, c) => c.date.localeCompare(a.date));
@@ -778,6 +853,7 @@ function openBar(id){
     <h3>${esc(b.name)}</h3>
     <p class="muted" style="margin:0 0 6px">${esc(b.addr || 'Adresse à compléter')}</p>
     ${b.info ? `<p class="small" style="margin:0 0 12px">${esc(b.info)}</p>` : ''}
+    ${hhBox(b)}
     <div class="row" style="margin-bottom:10px">
       <a class="btn ghost sm" href="${esc(L.apple)}" target="_blank" rel="noopener">🗺️ Plans</a>
       <a class="btn ghost sm" href="${esc(L.google)}" target="_blank" rel="noopener">📍 Google</a>
@@ -818,7 +894,7 @@ function openBarForm(b){
     e.preventDefault(); const v = Object.fromEntries(new FormData(e.target).entries());
     const name = String(v.name || '').trim(); if (!name) return;
     const target = edit ? b : {id:uid(), lat:null, lon:null};
-    Object.assign(target, {name, addr:String(v.addr || '').trim(), q:v.q});
+    Object.assign(target, {name, addr:String(v.addr || '').trim(), q:v.q}); if (edit) target.edited = true;
     if (!edit) state.bars.push(target);
     save(); renderAll(); closeSheet(); toast(edit ? 'Bar modifié' : 'Bar ajouté 📍');
     if (v.here) locateBar(target);
@@ -909,6 +985,10 @@ document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === 'tab-' + b.dataset.tab));
   window.scrollTo(0, 0);
 });
+
+/* les happy hours bougent avec l'heure */
+setInterval(() => { if ($('#tab-bars').classList.contains('active')) renderBars(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderBars(); });
 
 /* démarrage */
 if (!canStore) {
