@@ -22,6 +22,7 @@
   --red:#A8322A; --red-soft:#F6DCD5; --on-amber:#2B1A10;
   --banner:linear-gradient(160deg,#2E1B10 0%,#4A2C1A 60%,#6B3F1F 100%);
   --shadow:0 1px 2px rgba(43,26,16,.08),0 8px 24px rgba(43,26,16,.10);
+  --ink-outremer:#3D5BD9; --ink-violet:#7A4FC2; --ink-prune:#8E2B5E;
   --display:'Alfa Slab One',Rockwell,Georgia,serif;
   --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
   color-scheme:light;
@@ -33,6 +34,7 @@
     --red:#EC7B6E; --red-soft:#3D1F1A; --on-amber:#2B1A10;
     --banner:linear-gradient(160deg,#120A05 0%,#2E1B10 60%,#4A2C1A 100%);
     --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+    --ink-outremer:#7088F0; --ink-violet:#A483E6; --ink-prune:#C9578F;
     color-scheme:dark;
   }
 }
@@ -42,6 +44,7 @@
   --red:#EC7B6E; --red-soft:#3D1F1A; --on-amber:#2B1A10;
   --banner:linear-gradient(160deg,#120A05 0%,#2E1B10 60%,#4A2C1A 100%);
   --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  --ink-outremer:#7088F0; --ink-violet:#A483E6; --ink-prune:#C9578F;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -205,7 +208,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 /* animation tampon */
 .fx{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(20,10,5,0);transition:background .25s;padding:24px}
 .fx.on{background:rgba(20,10,5,.62)}
-.fx .paper{position:relative;width:min(300px,78vw);aspect-ratio:1;border-radius:24px;background:var(--foam);box-shadow:0 20px 50px rgba(0,0,0,.4);display:grid;place-items:center;padding:14px;opacity:0;transform:translateY(20px);transition:all .25s}
+.fx .paper{--ink-outremer:#3D5BD9;--ink-violet:#7A4FC2;--ink-prune:#8E2B5E;position:relative;width:min(300px,78vw);aspect-ratio:1;border-radius:24px;background:var(--foam);box-shadow:0 20px 50px rgba(0,0,0,.4);display:grid;place-items:center;padding:14px;opacity:0;transform:translateY(20px);transition:all .25s}
 .fx.on .paper{opacity:1;transform:none}
 .fx .st{width:100%;height:100%;opacity:0;transform:scale(2.6) rotate(-24deg)}
 .fx.slam .st{animation:slam .34s cubic-bezier(.55,0,.75,.2) forwards}
@@ -314,6 +317,39 @@ const STYLES = [
   ['autre', 'Autre', '#33415C']
 ];
 const STYLE = Object.fromEntries(STYLES.map(s => [s[0], {label:s[1], color:s[2]}]));
+/* encres des tampons : chaque tampon reçoit la sienne, jamais celle des 4 précédents */
+const INKS = [
+  ['vermillon', '#D9381E'], ['orange', '#E0701A'], ['moutarde', '#C99A0E'], ['olive', '#7A9A1F'],
+  ['emeraude', '#2E8B4E'], ['turquoise', '#13998F'], ['petrole', '#2C6E8A'], ['azur', '#1F7FC4'],
+  ['outremer', '#3D5BD9'], ['violet', '#7A4FC2'], ['fuchsia', '#B83A9E'], ['framboise', '#C4245A'],
+  ['prune', '#8E2B5E'], ['terracotta', '#B5532A']
+];
+const INK = Object.fromEntries(INKS);
+const INK_DARK_VARIANT = ['outremer', 'violet', 'prune']; // éclaircies en mode sombre
+const INK_GAP = 4;
+// familles : deux tampons qui se suivent ne sont jamais de la même famille
+const INK_FAMILY = {vermillon:'chaud', orange:'chaud', terracotta:'chaud', framboise:'chaud', moutarde:'vert', olive:'vert', emeraude:'vert', turquoise:'bleu', petrole:'bleu', azur:'bleu', outremer:'bleu', violet:'pourpre', fuchsia:'pourpre', prune:'pourpre'};
+function inkAllowed(recent){
+  const r = recent.slice(-INK_GAP), fam = INK_FAMILY[recent[recent.length - 1]];
+  return INKS.map(i => i[0]).filter(k => !r.includes(k) && INK_FAMILY[k] !== fam);
+}
+function chrono(a, b){ return (a.date || '').localeCompare(b.date || '') || (a.created || 0) - (b.created || 0); }
+function assignMissingInks(list){
+  const recent = [];
+  list.slice().sort(chrono).forEach(t => {
+    if (!INK[t.ink]) { const ok = inkAllowed(recent); t.ink = ok[hash(String(t.id)) % ok.length]; }
+    recent.push(t.ink);
+  });
+}
+function pickInk(){
+  const recent = state.tastings.map(t => t.ink).filter(Boolean);
+  const ok = inkAllowed(recent);
+  return ok[Math.floor(Math.random() * ok.length)];
+}
+function inkColor(t){
+  if (!INK[t.ink]) return (STYLE[t.style] || STYLE.autre).color;
+  return INK_DARK_VARIANT.includes(t.ink) ? `var(--ink-${t.ink})` : INK[t.ink];
+}
 const SERVICES = [['pression', 'Pression'], ['bouteille', 'Bouteille'], ['canette', 'Canette']];
 const SERVICE = Object.fromEntries(SERVICES);
 const QUARTIERS = ['Krutenau', 'Gare', 'Centre', 'Neudorf'];
@@ -400,6 +436,8 @@ function repair(s){
   s.wishes = Array.isArray(s.wishes) ? s.wishes : [];
   s.seen = s.seen || {};
   s.owner = s.owner || 'Aurore';
+  // une encre pour chaque tampon qui n'en a pas encore (tampons d'avant les encres)
+  assignMissingInks(s.tastings);
   // nouveaux bars ajoutés dans une mise à jour de l'appli
   SEED_BARS.forEach(b => { if (!s.bars.some(x => x.id === b.id) && !s.removedSeeds.includes(b.id)) s.bars.push(Object.assign({seed:true}, b)); });
   // infos tenues à jour par l'appli (happy hours, description)
@@ -470,7 +508,7 @@ function ownerOf(){ const n = state.owner || 'Aurore'; return (/^[aeiouyhâéè�
 function clip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
 function stampSvg(t){
   const st = STYLE[t.style] || STYLE.autre;
-  const c = st.color;
+  const c = inkColor(t);
   const pid = 'p' + t.id;
   const beer = clip(t.beer, 26).toUpperCase();
   const place = clip(placeName(t), 30).toUpperCase();
@@ -484,7 +522,7 @@ function stampSvg(t){
       <path id="${pid}t" d="M 38 100 A 62 62 0 0 1 162 100"/>
       <path id="${pid}b" d="M 26 100 A 74 74 0 0 0 174 100"/>
     </defs>
-    <g filter="url(#ink)" fill="${c}" stroke="${c}" font-family="'Alfa Slab One',Rockwell,Georgia,serif">
+    <g filter="url(#ink)" style="color:${c}" fill="currentColor" stroke="currentColor" font-family="'Alfa Slab One',Rockwell,Georgia,serif">
       <circle cx="100" cy="100" r="92" fill="none" stroke-width="5"/>
       <circle cx="100" cy="100" r="82" fill="none" stroke-width="1.6"/>
       <circle cx="100" cy="100" r="47" fill="none" stroke-width="1.6"/>
@@ -778,7 +816,7 @@ function openTasting(pre){
     Object.assign(t, {beer, brewery:String(v.brewery || '').trim(), style:v.style, service:v.service, barId, place, rating:+v.rating || 0, date:v.date || iso(today()), comment:String(v.comment || '').trim()});
     if (pendingPhoto) { const old = t.photoId; t.photoId = uid(); await putPhoto({id:t.photoId, data:pendingPhoto, date:t.date}); if (old) delPhoto(old); }
     else if (pendingPhotoRemoved && t.photoId) { delPhoto(t.photoId); delete t.photoId; }
-    if (!edit) state.tastings.push(t);
+    if (!edit) { t.ink = pickInk(); state.tastings.push(t); }
     // rayer des envies
     const crossed = state.wishes.filter(w => norm(w.beer) === norm(beer));
     if (crossed.length) state.wishes = state.wishes.filter(w => norm(w.beer) !== norm(beer));
