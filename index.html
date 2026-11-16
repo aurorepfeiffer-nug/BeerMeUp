@@ -308,6 +308,22 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 .fxrate button.on{color:var(--amber)}
 .fxlinks{display:flex;gap:18px}
 .fxlinks button{background:none;border:0;color:var(--foam);font-size:14px;text-decoration:underline;text-underline-offset:3px;opacity:.85;padding:6px}
+.top{transition:padding .2s}
+.top.compact{padding:12px 16px 12px;margin-bottom:12px}
+.top.compact .brand{font-size:26px}
+.top.compact .chips{display:none}
+.top.compact .icon-btn{top:12px;right:12px;width:40px;height:40px;font-size:17px}
+.segrow{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.segrow .seg{flex:1;margin:0}
+.count{flex:none;font-size:13px;font-weight:700;color:var(--muted)}
+.filters .pill{min-height:40px}
+.pill.on{background:var(--amber);border-color:var(--amber);color:var(--on-amber);font-weight:600}
+.qsel{flex:none;appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 30px 7px 13px;font-size:14px;font-weight:600;min-height:40px;width:auto;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.qsel.on{background-color:var(--amber);border-color:var(--amber);color:var(--on-amber)}
+#barMap{height:calc(100vh - 360px);height:calc(100svh - 360px);min-height:320px;max-height:680px}
+.maplocate{position:absolute;top:10px;right:10px;z-index:500;width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);box-shadow:0 3px 10px rgba(0,0,0,.3);font-size:20px;display:grid;place-items:center}
+.maplocate.on{background:var(--amber)}
+.barsfoot{display:flex;justify-content:center;margin:4px 0 0}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
@@ -343,7 +359,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 </svg>
 
 <div class="app">
-  <header class="top">
+  <header class="top compact">
     <div class="bubbles" aria-hidden="true">
       <span style="width:150px;height:150px;right:-40px;top:-60px"></span>
       <span style="width:60px;height:60px;right:90px;top:30px"></span>
@@ -811,6 +827,8 @@ function fmtDays(d){
   const l = set.map(x => DAYS_L[x - 1]); l[0] = l[0][0].toUpperCase() + l[0].slice(1); return l.join(', ');
 }
 const fmtDist = m => m == null ? '' : m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+let barQuarter = '', barOn = {}, mapFit = false, fitTimer = null;
+const BAR_TOGGLES = () => [['hh', '🍻 Happy hour'], ['na', '🌿 Sans alcool'], ['fresh', '✨ À découvrir'], ['seen', '🍺 ' + VISITED()], ['fav', '❤️ Favoris']];
 let barView = null, mapSel = null, map = null, pinLayer = null, meDot = null, centeredOnMe = false;
 // position du téléphone : demandée une fois, puis rafraîchie en silence à chaque ouverture
 const nearStrasbourg = p => Math.abs(p.lat - 48.58) < .15 && Math.abs(p.lon - 7.75) < .2;
@@ -829,43 +847,47 @@ function refreshPos(silent, cb){
 function barsSkeleton(){
   if ($('#barsTop')) return;
   $('#tab-bars').innerHTML = `<div id="barsTop"></div>
-    <div id="mapWrap" class="mapwrap" hidden><div id="barMap"></div><p class="mapmsg" id="mapMsg">La carte se charge…</p><button type="button" id="mapCard" class="mapcard" hidden></button></div>
+    <div id="mapWrap" class="mapwrap" hidden><div id="barMap"></div><button type="button" class="maplocate" data-act="locate" aria-label="Me situer sur la carte">📍</button><p class="mapmsg" id="mapMsg">La carte se charge…</p><button type="button" id="mapCard" class="mapcard" hidden></button></div>
     <div id="barsList"></div>
+    <div class="barsfoot"><button class="btn ghost sm" data-act="newbar">＋ Ajouter un bar</button></div>
     <p class="note-src" id="barsNote"></p>`;
 }
 function renderBars(){
   barsSkeleton();
   barView = barView || state.settings.barView || 'map';
   const visited = visitedBarIds();
-  const quarters = ['Tous', '🍻 Happy hour', NA_PILL].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], [VISITED(), 'À découvrir']);
-  if (!quarters.includes(barFilter)) barFilter = 'Tous';
+  const quarters = QUARTIERS.concat([...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))]);
+  if (barQuarter && !quarters.includes(barQuarter)) barQuarter = '';
   let list = state.bars.slice();
   const now = new Date();
-  if (barFilter === '🍻 Happy hour') list = list.filter(b => { const st = hhStatus(b, now); return st && (st.on || st.soon); });
-  else if (barFilter === NA_PILL) list = list.filter(b => (b.beers || []).some(isNA));
-  else if (barFilter === VISITED()) list = list.filter(b => visited.has(b.id));
-  else if (barFilter === 'À découvrir') list = list.filter(b => !visited.has(b.id));
-  else if (barFilter !== 'Tous') list = list.filter(b => b.q === barFilter);
+  if (barQuarter) list = list.filter(b => b.q === barQuarter);
+  if (barOn.hh) list = list.filter(b => { const st = hhStatus(b, now); return st && (st.on || st.soon); });
+  if (barOn.na) list = list.filter(b => (b.beers || []).some(isNA));
+  if (barOn.fav) list = list.filter(b => b.fav);
+  if (barOn.fresh) list = list.filter(b => !visited.has(b.id));
+  if (barOn.seen) list = list.filter(b => visited.has(b.id));
   const bq = norm(beerQ);
   if (bq) list = list.filter(b => norm(b.name).includes(bq) || beerHits(b, bq).length);
   const hadFocus = document.activeElement && document.activeElement.id === 'beerSearch';
   if (myPos) list.sort((a, b) => (dist(a) ?? 1e9) - (dist(b) ?? 1e9));
-  else if (barFilter === '🍻 Happy hour') { const k = b => { const st = hhStatus(b, now); return st.on ? toMin(st.w.t) - 2000 : toMin(st.w.f); }; list.sort((a, b) => k(a) - k(b)); }
+  else if (barOn.hh) { const k = b => { const st = hhStatus(b, now); return st.on ? toMin(st.w.t) - 2000 : toMin(st.w.f); }; list.sort((a, b) => k(a) - k(b)); }
   else { const qi = b => { const i = QUARTIERS.indexOf(b.q); return i < 0 ? 99 : i; }; list.sort((a, b) => qi(a) - qi(b) || a.name.localeCompare(b.name, 'fr')); }
   const count = id => state.tastings.filter(t => t.barId === id).length;
   // les bières à mettre en avant : celles qu'on cherche, ou les sans alcool
-  const shownBeers = b => bq ? beerHits(b, bq) : barFilter === NA_PILL ? (b.beers || []).filter(isNA) : [];
+  const shownBeers = b => bq ? beerHits(b, bq) : barOn.na ? (b.beers || []).filter(isNA) : [];
   const servesLine = b => { const hits = shownBeers(b); return hits.length ? `<span class="serves">🍺 ${esc(hits.slice(0, 3).join(', '))}${hits.length > 3 ? ' et ' + (hits.length - 3) + ' autres' : ''}</span>` : ''; };
   const hhLine = b => { const st = hhStatus(b, now); return st && (st.on || st.soon) ? `<span class="hh ${st.on ? 'on' : 'soon'}" style="display:table">${hhLabel(st)}</span>` : ''; };
   $('#barsTop').innerHTML = `
-    <div class="seg"><button type="button" class="${barView === 'map' ? 'on' : ''}" data-view="map" aria-pressed="${barView === 'map'}">🗺️ Carte</button><button type="button" class="${barView === 'list' ? 'on' : ''}" data-view="list" aria-pressed="${barView === 'list'}">☰ Liste</button></div>
-    <input type="search" class="search" id="beerSearch" placeholder="🔎 Un bar, une bière, une brasserie…" value="${esc(beerQ)}" aria-label="Chercher un bar ou une bière" autocomplete="off">
-    <div class="filters" role="tablist">${quarters.map(q => `<button class="pill ${q === barFilter ? 'active' : ''}" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-    <div class="row" style="margin-bottom:12px">
-      <button class="btn sm ${myPos ? 'primary' : 'ghost'}" data-act="locate">📍 ${myPos ? (barView === 'map' ? 'Te voilà' : 'Trié du plus proche') : 'Autour de moi'}</button>
-      <button class="btn sm ghost" data-act="newbar">＋ Ajouter un bar</button>
+    <div class="segrow"><div class="seg"><button type="button" class="${barView === 'map' ? 'on' : ''}" data-view="map" aria-pressed="${barView === 'map'}">🗺️ Carte</button><button type="button" class="${barView === 'list' ? 'on' : ''}" data-view="list" aria-pressed="${barView === 'list'}">☰ Liste</button></div>
+      <span class="count" aria-live="polite">${plural(list.length, 'bar')}</span></div>
+    <input type="search" class="search" id="beerSearch" placeholder="🔎 Un bar, une bière, une brasserie…" value="${esc(beerQ)}" aria-label="Chercher un bar ou une bière" autocomplete="off" style="margin-bottom:10px">
+    <div class="filters">
+      <select class="qsel ${barQuarter ? 'on' : ''}" id="qSel" aria-label="Quartier"><option value="">📍 Partout</option>${quarters.map(q => `<option ${q === barQuarter ? 'selected' : ''}>${esc(q)}</option>`).join('')}</select>
+      ${BAR_TOGGLES().map(([k, l]) => `<button class="pill ${barOn[k] ? 'on' : ''}" data-tog="${k}" aria-pressed="${!!barOn[k]}">${esc(l)}</button>`).join('')}
     </div>`;
-  const emptyMsg = bq ? `Aucun bar ne correspond à « ${esc(beerQ.trim())} »${barFilter !== 'Tous' ? ' avec ce filtre' : ''}. Le relevé ne couvre pas encore tous les bars.` : barFilter === '🍻 Happy hour' ? 'Plus d’happy hour en vue pour aujourd’hui. Demain, ça recommence 🍻' : 'Aucun bar ici pour l’instant.';
+  $('#qSel').onchange = e => { barQuarter = e.target.value; mapFit = true; renderBars(); };
+  const anyF = barQuarter || Object.values(barOn).some(Boolean);
+  const emptyMsg = bq ? `Aucun bar ne correspond à « ${esc(beerQ.trim())} »${anyF ? ' avec ces filtres' : ''}. Le relevé ne couvre pas encore tous les bars.` : barOn.hh && !barQuarter ? 'Plus d’happy hour en vue pour aujourd’hui. Demain, ça recommence 🍻' : 'Aucun bar ne coche toutes ces cases. Enlève un filtre.';
   $('#barsList').innerHTML = list.length ? `<div class="barlist">${list.map(b => {
       const n = count(b.id), v = visited.has(b.id);
       return `<button class="bar ${v ? 'visited' : ''}" data-bar="${b.id}">
@@ -884,7 +906,7 @@ function renderBars(){
     + `Bars et happy hours trouvés en ligne le ${SEED_DATE} (Schlouk Map, Privateaser).${ATTOS_DATE ? ` Bières relevées dans les bars par Attos, mise à jour du ${ATTOS_DATE}.` : ''} Vérifie sur place, ça bouge vite.`;
   if (barView === 'map') showMap(list, now, visited, emptyMsg, servesLine, hhLine);
   const s = $('#beerSearch');
-  s.oninput = e => { beerQ = e.target.value; renderBars(); };
+  s.oninput = e => { beerQ = e.target.value; clearTimeout(fitTimer); fitTimer = setTimeout(() => { if (norm(beerQ).length >= 3) { mapFit = true; renderBars(); } }, 700); renderBars(); };
   if (hadFocus) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
 }
 
@@ -918,6 +940,7 @@ function showMap(list, now, visited, emptyMsg, servesLine, hhLine){
       else if (pts.length) { const m = k => pts.reduce((s, b) => s + b[k], 0) / pts.length; map.setView([m('lat'), m('lon')], 15); }
     }
     $('#mapMsg').hidden = true;
+    document.querySelector('.maplocate').classList.toggle('on', !!myPos);
     pinLayer.clearLayers();
     list.filter(b => b.lat != null && b.lon != null).forEach(b => {
       const st = hhStatus(b, now);
@@ -939,7 +962,9 @@ function showMap(list, now, visited, emptyMsg, servesLine, hhLine){
     } else if (!list.length) {
       c.hidden = false; delete c.dataset.bar; c.innerHTML = `<span class="b small">${emptyMsg}</span>`;
     } else c.hidden = true;
-    setTimeout(() => map.invalidateSize(), 0);
+    const geo = list.filter(b => b.lat != null && nearStrasbourg(b));
+    if (mapFit && geo.length) { mapFit = false; setTimeout(() => { map.invalidateSize(); if (geo.length === 1) map.setView([geo[0].lat, geo[0].lon], 16); else map.fitBounds(geo.map(b => [b.lat, b.lon]), {padding:[40, 40], maxZoom:16}); }, 0); }
+    else setTimeout(() => map.invalidateSize(), 0);
   }).catch(() => {
     const m = $('#mapMsg'); m.hidden = false;
     m.innerHTML = 'La carte a besoin d’internet.<br>La liste, elle, marche toujours.<br><button type="button" class="btn primary sm" data-view="list" style="margin-top:12px">☰ Voir la liste</button>';
@@ -1479,7 +1504,7 @@ function toast(msg, undo){
 
 /* clics délégués */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act],[data-t],[data-bar],[data-q],[data-year],[data-wish-stamp],[data-wish-del],[data-view]');
+  const el = e.target.closest('[data-act],[data-t],[data-bar],[data-tog],[data-year],[data-wish-stamp],[data-wish-del],[data-view],[data-wish-map]');
   if (!el) return;
   if (el.dataset.view) { barView = el.dataset.view; state.settings.barView = barView; save(); renderBars(); }
   else if (el.dataset.act === 'stamp') openQuickStamp();
@@ -1490,7 +1515,7 @@ document.addEventListener('click', e => {
   }
   else if (el.dataset.t) openDetail(el.dataset.t);
   else if (el.dataset.bar) openBar(el.dataset.bar);
-  else if (el.dataset.q) { barFilter = el.dataset.q; renderBars(); }
+  else if (el.dataset.tog) { const k = el.dataset.tog; barOn[k] = !barOn[k]; if (barOn[k] && k === 'fresh') barOn.seen = false; if (barOn[k] && k === 'seen') barOn.fresh = false; mapFit = true; renderBars(); }
   else if (el.dataset.year) { year = el.dataset.year; renderAnnee(); }
   else if (el.dataset.wishStamp) { const w = state.wishes.find(x => x.id === el.dataset.wishStamp); if (w) openQuickStamp(null, w.beer); }
   else if (el.dataset.wishDel) {
@@ -1506,6 +1531,7 @@ document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.nav[data-tab]').forEach(x => x.classList.toggle('active', x === b));
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === 'tab-' + b.dataset.tab));
   window.scrollTo(0, 0);
+  $('.top').classList.toggle('compact', b.dataset.tab === 'bars');
   if (b.dataset.tab === 'bars' && map) setTimeout(() => map.invalidateSize(), 30);
 });
 
