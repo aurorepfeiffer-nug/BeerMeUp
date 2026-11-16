@@ -521,7 +521,9 @@ function defaults(){
     removedSeeds: [],
     tastings: [],
     wishes: [],
-    seen: {}
+    seen: {},
+    backup: null,
+    backupNext: 10
   };
 }
 
@@ -538,6 +540,8 @@ function repair(s){
   s.removedSeeds = Array.isArray(s.removedSeeds) ? s.removedSeeds : [];
   s.wishes = Array.isArray(s.wishes) ? s.wishes : [];
   s.seen = s.seen || {};
+  s.backup = s.backup || null;
+  if (typeof s.backupNext !== 'number') s.backupNext = ((s.backup && s.backup.count) || 0) + 10;
   s.owner = typeof s.owner === 'string' ? s.owner : '';
   s.gender = ['f', 'm', 'n'].includes(s.gender) ? s.gender : '';
   s.avatar = typeof s.avatar === 'string' ? s.avatar : '';
@@ -1072,6 +1076,7 @@ function openTasting(pre){
     else sub = 'Une nouvelle bière au compteur.';
     if (crossed.length) sub += ' Rayée de tes envies.';
     playStamp(t, msg, sub);
+    maybeRemindBackup();
   };
 }
 $('#photoInput').addEventListener('change', async e => {
@@ -1249,13 +1254,14 @@ function openSettings(){
       <div class="sheet-actions"><button type="button" class="btn ghost" data-close>Fermer</button><button type="submit" class="btn primary">Enregistrer</button></div>
     </form>
     <div class="stack">
-      <p class="small muted" style="margin:0">Ton passeport est rangé sur ce téléphone, nulle part ailleurs. Télécharge une sauvegarde de temps en temps : elle contient aussi les photos.</p>
-      <button class="btn ghost" id="btnExport">⬇️ Télécharger une sauvegarde</button>
+      <p class="small muted" style="margin:0">Ton passeport est rangé sur ce téléphone, nulle part ailleurs. Sauvegarde-le de temps en temps : choisis « Enregistrer dans Fichiers », puis iCloud Drive. Les photos sont dedans aussi.${state.backup ? ' Dernière sauvegarde : ' + fmtDay(new Date(state.backup.at)) + '.' : ' Pas encore de sauvegarde.'}</p>
+      <button class="btn primary" id="btnExport">💾 Sauvegarder mon passeport</button>
       <button class="btn ghost" id="btnImport">⬆️ Restaurer une sauvegarde</button>
       <button class="btn danger" id="btnReset">Tout effacer</button>
       <p class="small muted" style="margin:0">À consommer avec modération. L’abus d’alcool est dangereux pour la santé.</p>
     </div>`);
   bindProfile(() => { keepTyped($('#sForm')); openSettings(); });
+  preparePhotos();
   $('#sForm').onsubmit = e => { e.preventDefault(); const v = readProfile(e.target); if (!v) return; state.settings.sound = v.sound === '1' ? 1 : 0; save(); renderAll(); closeSheet(); toast('Profil enregistré'); };
   $('#btnExport').onclick = exportData;
   $('#btnImport').onclick = () => $('#importInput').click();
@@ -1265,10 +1271,36 @@ function download(blob, name){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
 }
+// les photos sont préparées à l'avance : l'iPhone n'ouvre le menu de partage que juste après un toucher
+let photosReady = null;
+function preparePhotos(){ allPhotos().then(p => { photosReady = p; }); }
 async function exportData(){
-  const photos = await allPhotos();
-  download(new Blob([JSON.stringify({app:'beermeup', exported:new Date().toISOString(), state, photos})], {type:'application/json'}), 'beer-me-up-sauvegarde-' + iso(today()) + '.json');
-  toast('Sauvegarde téléchargée');
+  const photos = photosReady || await allPhotos();
+  const name = 'beer-me-up-sauvegarde-' + iso(today()) + '.json';
+  const blob = new Blob([JSON.stringify({app:'beermeup', exported:new Date().toISOString(), state, photos})], {type:'application/json'});
+  let shared = false;
+  try {
+    const file = new File([blob], name, {type:'application/json'});
+    if (navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:'Sauvegarde Beer Me Up'}); shared = true; }
+  } catch(e){ if (e && e.name === 'AbortError') return; }
+  if (!shared) download(blob, name);
+  state.backup = {at:Date.now(), count:state.tastings.length}; state.backupNext = state.tastings.length + 10; save();
+  closeSheet(); toast('Sauvegarde faite 💾');
+}
+// tous les 10 tampons, l'appli propose une sauvegarde
+function maybeRemindBackup(){
+  if (state.tastings.length < state.backupNext) return;
+  setTimeout(() => {
+    if (!$('#sheet').hidden || !$('#fx').hidden) { setTimeout(maybeRemindBackup, 2000); return; }
+    preparePhotos();
+    const since = state.tastings.length - ((state.backup && state.backup.count) || 0);
+    showSheet(`<p class="eyebrow">Ton passeport</p><h3>💾 On met tes tampons à l’abri ?</h3>
+      <p>${plural(since, 'tampon')} depuis ta ${state.backup ? 'dernière sauvegarde' : 'première bière'}. Ils ne vivent que dans ce téléphone : si tu supprimes l’appli, ils partent avec.</p>
+      <p class="small muted">Choisis « Enregistrer dans Fichiers », puis iCloud Drive. Ta sauvegarde survit même à un changement de téléphone.</p>
+      <div class="sheet-actions"><button class="btn ghost" id="bkLater">Plus tard</button><button class="btn primary" id="bkNow">Sauvegarder</button></div>`);
+    $('#bkNow').onclick = exportData;
+    $('#bkLater').onclick = () => { state.backupNext = state.tastings.length + 5; save(); closeSheet(); };
+  }, 3800);
 }
 $('#importInput').addEventListener('change', async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
