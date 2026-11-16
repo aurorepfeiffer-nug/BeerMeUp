@@ -197,8 +197,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 /* feuille */
 .sheet-wrap{position:fixed;inset:0;background:rgba(20,10,5,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20;opacity:0;transition:opacity .2s}
 .sheet-wrap.open{opacity:1}
-.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto;transform:translateY(24px);transition:transform .2s}
-.sheet-wrap.open .sheet{transform:none}
+.sheet{background:var(--surface);width:100%;border-radius:24px 24px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
 .sheet-actions{display:flex;gap:10px;margin-top:8px}
 .sheet-actions .btn{flex:1}
 .stack{display:flex;flex-direction:column;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
@@ -231,10 +230,87 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:999px;font-size:14px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:all .2s;z-index:60;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
 .toast button{background:none;border:0;color:var(--amber);font-weight:700;text-decoration:underline;padding:0}
+
+/* fermer une feuille */
+.sheet-box{position:relative;width:100%;max-width:560px;transform:translateY(24px);transition:transform .2s}
+.sheet-wrap.open .sheet-box{transform:none}
+.sheet-x{position:absolute;top:12px;right:12px;z-index:3;width:38px;height:38px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink);font-size:24px;line-height:1;display:grid;place-items:center;box-shadow:var(--shadow)}
+.sheet > :first-child{padding-right:46px}
+
+/* avatar et profil */
+.avatar{border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--amber);color:var(--on-amber);font-family:var(--display);padding:0;border:2px solid rgba(255,246,224,.75)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.icon-btn.avatar{width:46px;height:46px;font-size:20px;background:var(--amber);color:var(--on-amber)}
+.avatar.big{width:84px;height:84px;font-size:34px;border-color:var(--amber);flex:none}
+.av-edit{display:flex;gap:14px;align-items:center;margin:0 0 16px}
+.genders{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 6px}
+.gopt{position:relative;margin:0}
+.gopt input{position:absolute;opacity:0;pointer-events:none}
+.gopt span{display:block;text-align:center;border:1px solid var(--line);border-radius:12px;padding:11px 4px;font-size:14px;font-weight:600;color:var(--ink);background:var(--bg)}
+.gopt input:checked + span{background:var(--amber);border-color:var(--amber);color:var(--on-amber)}
+.gopt input:focus-visible + span{outline:2px solid var(--amber-deep);outline-offset:2px}
+
+/* carte des bars */
+.seg{display:flex;background:var(--surface-2);border-radius:999px;padding:4px;margin:0 0 12px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:9px 10px;font-weight:600;font-size:15px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.mapwrap{position:relative;isolation:isolate;border-radius:22px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:12px;background:var(--surface-2)}
+#barMap{height:min(60vh,540px);width:100%}
+.mapmsg{position:absolute;inset:0;z-index:400;display:grid;place-content:center;text-align:center;padding:24px;color:var(--muted);font-size:15px;margin:0}
+.leaflet-container{font-family:var(--body);background:var(--surface-2)}
+.mapwrap.night .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) sepia(.25)}
+.pinwrap{background:none;border:0}
+.pin{width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--wood-2);display:grid;place-items:center;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.35);transition:transform .15s}
+.pin.v{background:var(--amber-soft);border-color:var(--amber)}
+.pin.hh{background:var(--amber);border-color:#FFF6E0;animation:glow 1.8s ease-in-out infinite}
+.pin.sel{transform:scale(1.3);border-color:var(--red)}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(242,169,59,.7)}50%{box-shadow:0 0 0 9px rgba(242,169,59,0)}}
+.me{display:block;width:18px;height:18px;border-radius:50%;background:#2F7BF6;border:3px solid #fff;box-shadow:0 0 0 7px rgba(47,123,246,.25)}
+.mapcard{position:absolute;left:10px;right:10px;bottom:10px;z-index:500;display:flex;gap:12px;align-items:center;text-align:left;width:auto;background:var(--surface);color:var(--ink);border:0;border-radius:18px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.mapcard .b{flex:1;min-width:0}
+.mapcard strong{display:block;font-size:16px;line-height:1.25}
+.mapcard .meta{display:block;font-size:13px;color:var(--muted)}
+.mapcard .go{flex:none;background:var(--amber);color:var(--on-amber);border-radius:12px;padding:8px 12px;font-weight:700;font-size:14px}
+
+/* ouverture : la bière se remplit */
+.splash{position:fixed;inset:0;z-index:9999;background:#2E1B10;background-image:var(--banner);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .45s ease}
+.splash.out{opacity:0;pointer-events:none}
+.splash .glass{width:124px;height:176px;overflow:visible}
+.sp-liquid{transform:translateY(138px);animation:pour 1.3s .15s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes pour{to{transform:translateY(0)}}
+.sp-foam{opacity:0;animation:foam .5s 1.05s ease-out forwards}
+@keyframes foam{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sp-bub circle{animation:bub 1.1s linear infinite}
+.sp-bub circle:nth-child(2){animation-delay:.35s}
+.sp-bub circle:nth-child(3){animation-delay:.7s}
+.sp-bub circle:nth-child(4){animation-delay:.2s}
+@keyframes bub{from{transform:translateY(0);opacity:.85}to{transform:translateY(-95px);opacity:0}}
+.splash-brand{font-family:var(--display);font-size:42px;line-height:1;color:var(--amber);margin:0;opacity:0;transform:translateY(8px);animation:brandIn .5s 1.2s ease-out forwards}
+.splash-brand em{font-style:normal;color:var(--foam)}
+@keyframes brandIn{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sp-liquid,.sp-foam,.splash-brand{animation-duration:.01s;animation-delay:0s}.sp-bub circle,.pin.hh{animation:none}}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
 <body>
+<div id="splash" class="splash" aria-hidden="true">
+  <svg class="glass" viewBox="0 0 124 176">
+    <defs>
+      <clipPath id="spClip"><path d="M24 24 H96 L89 156 Q88 164 80 164 H40 Q32 164 31 156 Z"/></clipPath>
+      <linearGradient id="spBeer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7C35C"/><stop offset="1" stop-color="#C9780C"/></linearGradient>
+    </defs>
+    <g clip-path="url(#spClip)">
+      <g class="sp-liquid">
+        <rect x="0" y="40" width="124" height="140" fill="url(#spBeer)"/>
+        <g class="sp-bub" fill="rgba(255,246,224,.65)"><circle cx="46" cy="158" r="2.3"/><circle cx="62" cy="150" r="1.7"/><circle cx="76" cy="160" r="2"/><circle cx="55" cy="128" r="1.5"/></g>
+        <g class="sp-foam" fill="#FFF6E0"><rect x="0" y="30" width="124" height="16"/><circle cx="32" cy="32" r="10"/><circle cx="51" cy="28" r="12"/><circle cx="72" cy="30" r="11"/><circle cx="91" cy="32" r="10"/></g>
+      </g>
+    </g>
+    <path d="M95 56 h9 a14 14 0 0 1 14 14 v30 a14 14 0 0 1 -14 14 h-12" fill="none" stroke="#FFF6E0" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+    <path d="M24 24 H96 L89 156 Q88 164 80 164 H40 Q32 164 31 156 Z" fill="none" stroke="#FFF6E0" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+  <p class="splash-brand">Beer <em>Me</em> Up</p>
+</div>
 <svg class="svgdefs" aria-hidden="true" focusable="false">
   <defs>
     <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
@@ -258,16 +334,14 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
     <h1 class="brand">Beer <em>Me</em> Up</h1>
     <p class="sub" id="sub">Passeport d'Aurore · Strasbourg</p>
     <div class="chips" id="chips"></div>
-    <button class="icon-btn" id="btnSettings" aria-label="Réglages">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+    <button class="icon-btn avatar" id="btnSettings" aria-label="Ton profil et tes réglages"></button>
   </header>
 
   <div id="banner" class="banner" hidden></div>
 
   <main>
-    <section id="tab-passeport" class="tab active"></section>
-    <section id="tab-bars" class="tab"></section>
+    <section id="tab-bars" class="tab active"></section>
+    <section id="tab-passeport" class="tab"></section>
     <section id="tab-envies" class="tab"></section>
     <section id="tab-annee" class="tab"></section>
   </main>
@@ -275,15 +349,15 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 
 <nav class="bottom" aria-label="Navigation">
   <div class="in">
-    <button class="nav active" data-tab="passeport"><span class="e">🎫</span>Passeport</button>
-    <button class="nav" data-tab="bars"><span class="e">📍</span>Bars</button>
-    <button class="nav stampbtn" id="btnStamp" aria-label="Tamponner une bière"><span class="e">🍺</span>Tamponner</button>
+    <button class="nav active" data-tab="bars"><span class="e">📍</span>Bars</button>
     <button class="nav" data-tab="envies"><span class="e">📝</span>À goûter</button>
+    <button class="nav stampbtn" id="btnStamp" aria-label="Tamponner une bière"><span class="e">🍺</span>Tamponner</button>
     <button class="nav" data-tab="annee"><span class="e">🏆</span>Mon année</button>
+    <button class="nav" data-tab="passeport"><span class="e">🎫</span>Passeport</button>
   </div>
 </nav>
 
-<div id="sheet" class="sheet-wrap" hidden><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div>
+<div id="sheet" class="sheet-wrap" hidden><div class="sheet-box"><button type="button" class="sheet-x" data-close aria-label="Fermer">×</button><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div></div>
 <div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p></div>
 <div id="toast" class="toast" role="status"></div>
 <input type="file" id="photoInput" accept="image/*" hidden>
@@ -431,14 +505,17 @@ function beerInfo(name){ return INFO_BY_NORM[norm(name)] || null; }
 function fmtDeg(d){ return d == null || d === '' ? '' : String(d).replace('.', ',') + '°'; }
 function infoStyle(i){ return i[0] != null && i[0] <= 0.5 ? 'sans' : (TYPE_STYLE[i[1]] || ''); }
 function beerMeta(x){ const i = beerInfo(x); return i ? [i[1], fmtDeg(i[0])].filter(Boolean).join(' · ') : ''; }
-function beerText(x){ const i = beerInfo(x); return norm([x].concat(i ? [i[1], i[2], i[3]] : []).join(' ')); }
+function isNA(x){ const i = beerInfo(x); return !!(i && i[0] != null && i[0] <= 0.5) || /sans alcool|\b0[.,]0\b/i.test(x); }
+function beerText(x){ const i = beerInfo(x); return norm([x].concat(i ? [i[1], i[2], i[3]] : [], isNA(x) ? ['sans alcool'] : []).join(' ')); }
 // la recherche propose aussi les brasseries et les types
 const ALL_TERMS = [...new Set(ALL_BEERS.concat(Object.values(INFO_BY_NORM).flatMap(i => [i[1], i[2]]).filter(Boolean)))].sort((a, c) => a.localeCompare(c, 'fr'));
 
 function defaults(){
   return {
     version:1,
-    owner:'Aurore',
+    owner:'',
+    gender:'',
+    avatar:'',
     settings:{sound:1},
     bars: SEED_BARS.map(b => Object.assign({seed:true}, b)),
     removedSeeds: [],
@@ -461,7 +538,9 @@ function repair(s){
   s.removedSeeds = Array.isArray(s.removedSeeds) ? s.removedSeeds : [];
   s.wishes = Array.isArray(s.wishes) ? s.wishes : [];
   s.seen = s.seen || {};
-  s.owner = s.owner || 'Aurore';
+  s.owner = typeof s.owner === 'string' ? s.owner : '';
+  s.gender = ['f', 'm', 'n'].includes(s.gender) ? s.gender : '';
+  s.avatar = typeof s.avatar === 'string' ? s.avatar : '';
   // une encre pour chaque tampon qui n'en a pas encore (tampons d'avant les encres)
   assignMissingInks(s.tastings);
   // bar fermé, retiré de l'appli : il disparaît, sauf s'il porte des tampons (il reste alors comme bar perso)
@@ -534,7 +613,13 @@ function levelOf(n){ let l = LEVELS[0]; LEVELS.forEach(x => { if (n >= x.min) l 
 function nextLevel(n){ return LEVELS.find(x => x.min > n) || null; }
 function placeName(t){ const b = t.barId ? barById(t.barId) : null; return b ? b.name : (t.place || 'Ailleurs'); }
 function stars(n){ n = n || 0; return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
-function ownerOf(){ const n = state.owner || 'Aurore'; return (/^[aeiouyhâéèêîïôûœ]/i.test(n) ? "d'" : 'de ') + n; }
+function ownerOf(){ const n = state.owner; return (/^[aeiouyhâéèêîïôûœ]/i.test(n) ? "d'" : 'de ') + n; }
+/* accord selon le genre choisi : masculin, féminin, neutre (neutre tant que rien n'est choisi) */
+function gw(m, f, n){ return state.gender === 'm' ? m : state.gender === 'f' ? f : n; }
+function statusName(lv){ return lv.min === 0 ? gw('Explorateur Curieux', 'Exploratrice Curieuse', 'Esprit Curieux') : gw('Explorateur ', 'Exploratrice ', 'Niveau ') + lv.name; }
+const VISITED = () => gw('Déjà venu', 'Déjà venue', 'Déjà visités');
+const NA_PILL = '🌿 Sans alcool';
+function avatarHtml(){ return state.avatar ? `<img src="${esc(state.avatar)}" alt="">` : esc((state.owner || '').trim().charAt(0).toUpperCase() || '🍺'); }
 
 /* ---------- le tampon ---------- */
 function clip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
@@ -616,8 +701,9 @@ let search = '';
 function renderHeader(){
   const n = distinctBeers();
   const lv = levelOf(n);
-  $('#sub').textContent = 'Passeport ' + ownerOf() + ' · Strasbourg';
-  $('#chips').innerHTML = `<span class="chip gold">${lv.icon} Exploratrice ${esc(lv.name)}</span>
+  $('#sub').textContent = (state.owner ? 'Passeport ' + ownerOf() : 'Ton passeport') + ' · Strasbourg';
+  $('#btnSettings').innerHTML = avatarHtml();
+  $('#chips').innerHTML = `<span class="chip gold">${lv.icon} ${esc(statusName(lv))}</span>
     <span class="chip">${plural(n, 'bière')}</span><span class="chip">${plural(visitedBarIds().size, 'bar')}</span>`;
 }
 function renderPasseport(){
@@ -628,7 +714,7 @@ function renderPasseport(){
   const shown = q ? list.filter(t => norm([t.beer, t.brewery, placeName(t), t.comment, (STYLE[t.style] || {}).label].join(' ')).includes(q)) : list;
   let html = `<div class="card">
       <div class="level"><div class="medal" aria-hidden="true">${lv.icon}</div>
-        <div style="flex:1;min-width:0"><p class="eyebrow" style="margin:0">Ton statut</p><div class="name">Exploratrice ${esc(lv.name)}</div>
+        <div style="flex:1;min-width:0"><p class="eyebrow" style="margin:0">Ton statut</p><div class="name">${esc(statusName(lv))}</div>
         <div class="small muted">${nx ? 'Encore ' + plural(nx.min - n, 'bière') + ' différente' + (nx.min - n > 1 ? 's' : '') + ' pour ' + esc(nx.name) + ' ' + nx.icon : 'Tu as tout débloqué. Respect.'}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>
       </div></div>`;
@@ -687,47 +773,124 @@ function fmtDays(d){
   const l = set.map(x => DAYS_L[x - 1]); l[0] = l[0][0].toUpperCase() + l[0].slice(1); return l.join(', ');
 }
 const fmtDist = m => m == null ? '' : m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+let barView = null, mapSel = null, map = null, pinLayer = null, meDot = null;
+function barsSkeleton(){
+  if ($('#barsTop')) return;
+  $('#tab-bars').innerHTML = `<div id="barsTop"></div>
+    <div id="mapWrap" class="mapwrap" hidden><div id="barMap"></div><p class="mapmsg" id="mapMsg">La carte se charge…</p><button type="button" id="mapCard" class="mapcard" hidden></button></div>
+    <div id="barsList"></div>
+    <p class="note-src" id="barsNote"></p>`;
+}
 function renderBars(){
+  barsSkeleton();
+  barView = barView || state.settings.barView || 'map';
   const visited = visitedBarIds();
-  const quarters = ['Tous', '🍻 Happy hour'].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], ['Déjà venue', 'À découvrir']);
+  const quarters = ['Tous', '🍻 Happy hour', NA_PILL].concat(QUARTIERS, [...new Set(state.bars.map(b => b.q).filter(q => q && !QUARTIERS.includes(q)))], [VISITED(), 'À découvrir']);
+  if (!quarters.includes(barFilter)) barFilter = 'Tous';
   let list = state.bars.slice();
   const now = new Date();
   if (barFilter === '🍻 Happy hour') list = list.filter(b => { const st = hhStatus(b, now); return st && (st.on || st.soon); });
-  else if (barFilter === 'Déjà venue') list = list.filter(b => visited.has(b.id));
+  else if (barFilter === NA_PILL) list = list.filter(b => (b.beers || []).some(isNA));
+  else if (barFilter === VISITED()) list = list.filter(b => visited.has(b.id));
   else if (barFilter === 'À découvrir') list = list.filter(b => !visited.has(b.id));
   else if (barFilter !== 'Tous') list = list.filter(b => b.q === barFilter);
   const bq = norm(beerQ);
-  if (bq) list = list.filter(b => beerHits(b, bq).length);
+  if (bq) list = list.filter(b => norm(b.name).includes(bq) || beerHits(b, bq).length);
   const hadFocus = document.activeElement && document.activeElement.id === 'beerSearch';
   if (myPos) list.sort((a, b) => (dist(a) ?? 1e9) - (dist(b) ?? 1e9));
   else if (barFilter === '🍻 Happy hour') { const k = b => { const st = hhStatus(b, now); return st.on ? toMin(st.w.t) - 2000 : toMin(st.w.f); }; list.sort((a, b) => k(a) - k(b)); }
   else { const qi = b => { const i = QUARTIERS.indexOf(b.q); return i < 0 ? 99 : i; }; list.sort((a, b) => qi(a) - qi(b) || a.name.localeCompare(b.name, 'fr')); }
   const count = id => state.tastings.filter(t => t.barId === id).length;
-  $('#tab-bars').innerHTML = `
-    <div class="row" style="margin-bottom:12px">
-      <button class="btn ${myPos ? 'primary' : 'ghost'}" data-act="locate">📍 ${myPos ? 'Trié du plus proche' : 'Autour de moi'}</button>
-      <button class="btn ghost" data-act="newbar">＋ Ajouter un bar</button>
-    </div>
-    ${ALL_BEERS.length ? `<input type="search" class="search" id="beerSearch" list="dlAllBeers" placeholder="🍺 Une bière, une brasserie, un style…" value="${esc(beerQ)}" aria-label="Trouver les bars par bière, brasserie ou style" autocomplete="off">
-    <datalist id="dlAllBeers">${ALL_TERMS.map(x => `<option value="${esc(x)}">`).join('')}</datalist>` : ''}
+  // les bières à mettre en avant : celles qu'on cherche, ou les sans alcool
+  const shownBeers = b => bq ? beerHits(b, bq) : barFilter === NA_PILL ? (b.beers || []).filter(isNA) : [];
+  const servesLine = b => { const hits = shownBeers(b); return hits.length ? `<span class="serves">🍺 ${esc(hits.slice(0, 3).join(', '))}${hits.length > 3 ? ' et ' + (hits.length - 3) + ' autres' : ''}</span>` : ''; };
+  const hhLine = b => { const st = hhStatus(b, now); return st && (st.on || st.soon) ? `<span class="hh ${st.on ? 'on' : 'soon'}" style="display:table">${hhLabel(st)}</span>` : ''; };
+  $('#barsTop').innerHTML = `
+    <div class="seg"><button type="button" class="${barView === 'map' ? 'on' : ''}" data-view="map" aria-pressed="${barView === 'map'}">🗺️ Carte</button><button type="button" class="${barView === 'list' ? 'on' : ''}" data-view="list" aria-pressed="${barView === 'list'}">☰ Liste</button></div>
+    <input type="search" class="search" id="beerSearch" placeholder="🔎 Un bar, une bière, une brasserie…" value="${esc(beerQ)}" aria-label="Chercher un bar ou une bière" autocomplete="off">
     <div class="filters" role="tablist">${quarters.map(q => `<button class="pill ${q === barFilter ? 'active' : ''}" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-    ${list.length ? `<div class="barlist">${list.map(b => {
-      const n = count(b.id), v = visited.has(b.id), hits = beerHits(b, bq);
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn sm ${myPos ? 'primary' : 'ghost'}" data-act="locate">📍 ${myPos ? (barView === 'map' ? 'Te voilà' : 'Trié du plus proche') : 'Autour de moi'}</button>
+      <button class="btn sm ghost" data-act="newbar">＋ Ajouter un bar</button>
+    </div>`;
+  const emptyMsg = bq ? `Aucun bar ne correspond à « ${esc(beerQ.trim())} »${barFilter !== 'Tous' ? ' avec ce filtre' : ''}. Le relevé ne couvre pas encore tous les bars.` : barFilter === '🍻 Happy hour' ? 'Plus d’happy hour en vue pour aujourd’hui. Demain, ça recommence 🍻' : 'Aucun bar ici pour l’instant.';
+  $('#barsList').innerHTML = list.length ? `<div class="barlist">${list.map(b => {
+      const n = count(b.id), v = visited.has(b.id);
       return `<button class="bar ${v ? 'visited' : ''}" data-bar="${b.id}">
         <span class="dot" aria-hidden="true">${v ? '🍺' : '·'}</span>
         <span class="b"><strong>${b.fav ? '❤️ ' : ''}${esc(b.name)}</strong>
           <span class="meta" style="display:block">${esc(b.addr || 'Adresse à compléter')}</span>
-          ${hits.length ? `<span class="serves">🍺 ${esc(hits.slice(0, 3).join(', '))}${hits.length > 3 ? ' et ' + (hits.length - 3) + ' autres' : ''}</span>` : ''}
-          <span class="tag">${esc(b.q || 'Ailleurs')}${v ? ' · déjà venue · ' + plural(n, 'tampon') : ''}</span>
-          ${(() => { const st = hhStatus(b, now); return st && (st.on || st.soon) ? `<span class="hh ${st.on ? 'on' : 'soon'}" style="display:table">${hhLabel(st)}</span>` : ''; })()}</span>
+          ${servesLine(b)}
+          <span class="tag">${esc(b.q || 'Ailleurs')}${v ? ' · ' + gw('déjà venu', 'déjà venue', 'déjà visité') + ' · ' + plural(n, 'tampon') : ''}</span>
+          ${hhLine(b)}</span>
         ${myPos && b.lat != null ? `<span class="dist">${fmtDist(dist(b))}</span>` : ''}
-      </button>`; }).join('')}</div>` : `<div class="card empty"><p>${bq ? `Aucun bar du relevé ne sert « ${esc(beerQ.trim())} »${barFilter !== 'Tous' ? ' avec ce filtre' : ''}. Le relevé ne couvre pas encore tous les bars.` : barFilter === '🍻 Happy hour' ? 'Plus d’happy hour en vue pour aujourd’hui. Demain, ça recommence 🍻' : 'Aucun bar ici pour l’instant.'}</p></div>`}
-    <p class="note-src">Bars et happy hours trouvés en ligne le ${SEED_DATE} (Schlouk Map, Privateaser).${ATTOS_DATE ? ` Bières relevées dans les bars par Attos, mise à jour du ${ATTOS_DATE}.` : ''} Vérifie sur place, ça bouge vite.</p>`;
+      </button>`; }).join('')}</div>` : `<div class="card empty"><p>${emptyMsg}</p></div>`;
+  $('#mapWrap').hidden = barView !== 'map';
+  $('#barsList').hidden = barView !== 'list';
+  const noGeo = list.filter(b => b.lat == null).length;
+  $('#barsNote').innerHTML = (barView === 'map' && noGeo ? `${plural(noGeo, 'bar')} sans position précise, à retrouver dans la liste. ` : '')
+    + `Bars et happy hours trouvés en ligne le ${SEED_DATE} (Schlouk Map, Privateaser).${ATTOS_DATE ? ` Bières relevées dans les bars par Attos, mise à jour du ${ATTOS_DATE}.` : ''} Vérifie sur place, ça bouge vite.`;
+  if (barView === 'map') showMap(list, now, visited, emptyMsg, servesLine, hhLine);
   const s = $('#beerSearch');
-  if (s) {
-    s.oninput = e => { beerQ = e.target.value; renderBars(); };
-    if (hadFocus) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
-  }
+  s.oninput = e => { beerQ = e.target.value; renderBars(); };
+  if (hadFocus) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+
+/* carte libre (OpenStreetMap + Leaflet), chargée seulement quand on l'ouvre : sans réseau, la liste marche toujours */
+const LEAFLET = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
+function loadLeaflet(){
+  if (window.L) return Promise.resolve();
+  if (loadLeaflet.p) return loadLeaflet.p;
+  return loadLeaflet.p = new Promise((res, rej) => {
+    if (!document.querySelector('link[data-leaflet]')) { const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = LEAFLET + 'leaflet.min.css'; css.dataset.leaflet = '1'; document.head.appendChild(css); }
+    const s = document.createElement('script'); s.src = LEAFLET + 'leaflet.min.js';
+    s.onload = () => window.L ? res() : rej();
+    s.onerror = () => { loadLeaflet.p = null; s.remove(); rej(); };
+    document.head.appendChild(s);
+  });
+}
+function darkMode(){ const t = document.documentElement.dataset.theme; return t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches); }
+function showMap(list, now, visited, emptyMsg, servesLine, hhLine){
+  loadLeaflet().then(() => {
+    if (!map) {
+      map = L.map('barMap', {zoomControl:false}).setView([48.5835, 7.7505], 14);
+      // fond OpenStreetMap, gratuit et sans clé ; la nuit, on l'assombrit
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19,
+        attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+      $('#mapWrap').classList.toggle('night', darkMode());
+      pinLayer = L.layerGroup().addTo(map);
+      map.on('click', () => { if (mapSel) { mapSel = null; renderBars(); } });
+      // premier cadrage : le centre de gravité des bars du centre-ville, assez près pour les distinguer
+      const pts = state.bars.filter(b => b.lat != null && Math.abs(b.lat - 48.583) < .012 && Math.abs(b.lon - 7.75) < .018);
+      if (pts.length) { const m = k => pts.reduce((s, b) => s + b[k], 0) / pts.length; map.setView([m('lat'), m('lon')], 15); }
+    }
+    $('#mapMsg').hidden = true;
+    pinLayer.clearLayers();
+    list.filter(b => b.lat != null && b.lon != null).forEach(b => {
+      const st = hhStatus(b, now);
+      const icon = L.divIcon({className:'pinwrap', iconSize:[28, 28], iconAnchor:[14, 14],
+        html:`<span class="pin ${visited.has(b.id) ? 'v' : ''} ${st && st.on ? 'hh' : ''} ${mapSel === b.id ? 'sel' : ''}">${b.fav ? '❤️' : '🍺'}</span>`});
+      L.marker([b.lat, b.lon], {icon, title:b.name, zIndexOffset:mapSel === b.id ? 1000 : 0}).on('click', () => { mapSel = b.id; renderBars(); }).addTo(pinLayer);
+    });
+    if (myPos) {
+      const ll = [myPos.lat, myPos.lon];
+      if (!meDot) meDot = L.marker(ll, {interactive:false, zIndexOffset:2000, icon:L.divIcon({className:'pinwrap', iconSize:[24, 24], iconAnchor:[12, 12], html:'<span class="me"></span>'})}).addTo(map);
+      else meDot.setLatLng(ll);
+    }
+    const sel = list.find(b => b.id === mapSel);
+    if (!sel) mapSel = null;
+    const c = $('#mapCard');
+    if (sel) {
+      c.hidden = false; c.dataset.bar = sel.id;
+      c.innerHTML = `<span class="b"><strong>${sel.fav ? '❤️ ' : ''}${esc(sel.name)}</strong><span class="meta">${esc(sel.addr || 'Adresse à compléter')}${myPos ? ' · ' + fmtDist(dist(sel)) : ''}</span>${servesLine(sel)}${hhLine(sel)}</span><span class="go">Voir</span>`;
+    } else if (!list.length) {
+      c.hidden = false; delete c.dataset.bar; c.innerHTML = `<span class="b small">${emptyMsg}</span>`;
+    } else c.hidden = true;
+    setTimeout(() => map.invalidateSize(), 0);
+  }).catch(() => {
+    const m = $('#mapMsg'); m.hidden = false;
+    m.innerHTML = 'La carte a besoin d’internet.<br>La liste, elle, marche toujours.<br><button type="button" class="btn primary sm" data-view="list" style="margin-top:12px">☰ Voir la liste</button>';
+  });
 }
 
 function renderEnvies(){
@@ -785,8 +948,20 @@ function renderAll(){ renderHeader(); renderPasseport(); renderBars(); renderEnv
 
 /* ---------- feuille ---------- */
 let sheetTimer = null;
-function showSheet(html){ clearTimeout(sheetTimer); const w = $('#sheet'); $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0; w.hidden = false; requestAnimationFrame(() => w.classList.add('open')); }
-function closeSheet(){ const w = $('#sheet'); w.classList.remove('open'); clearTimeout(sheetTimer); sheetTimer = setTimeout(() => { w.hidden = true; $('#sheetBody').innerHTML = ''; }, 200); }
+// le geste ou le bouton retour du téléphone ferme la feuille au lieu de quitter l'appli
+let sheetHist = false, popPending = false;
+function showSheet(html){
+  clearTimeout(sheetTimer); const w = $('#sheet'); $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0; w.hidden = false; requestAnimationFrame(() => w.classList.add('open'));
+  if (!sheetHist) { sheetHist = true; if (!popPending) { try { history.pushState({bmuSheet:1}, ''); } catch(e){} } }
+}
+function closeSheet(fromPop){
+  const w = $('#sheet'); w.classList.remove('open'); clearTimeout(sheetTimer); sheetTimer = setTimeout(() => { w.hidden = true; $('#sheetBody').innerHTML = ''; }, 200);
+  if (sheetHist) { sheetHist = false; if (fromPop !== true) { popPending = true; try { history.back(); } catch(e){ popPending = false; } } }
+}
+window.addEventListener('popstate', () => {
+  if (popPending) { popPending = false; if (sheetHist) { try { history.pushState({bmuSheet:1}, ''); } catch(e){} } return; }
+  if (sheetHist) closeSheet(true);
+});
 $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet' || e.target.closest('[data-close]')) closeSheet(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#fx').hidden) closeFx(); else if (!$('#sheet').hidden) closeSheet(); } });
 
@@ -890,7 +1065,7 @@ function openTasting(pre){
     const after = distinctBeers(), lvB = levelOf(before), lvA = levelOf(after);
     const firstHere = barId && state.tastings.filter(x => x.barId === barId).length === 1;
     let msg = 'Tampon n°' + state.tastings.length, sub = '';
-    if (lvA !== lvB) { msg = lvA.icon + ' Exploratrice ' + lvA.name + ' !'; sub = 'Nouveau statut débloqué avec ' + plural(after, 'bière') + ' différente' + (after > 1 ? 's' : '') + '.'; }
+    if (lvA !== lvB) { msg = lvA.icon + ' ' + statusName(lvA) + ' !'; sub = 'Nouveau statut débloqué avec ' + plural(after, 'bière') + ' différente' + (after > 1 ? 's' : '') + '.'; }
     else if (after > before && after === 1) sub = 'Ta toute première bière. Le passeport est lancé.';
     else if (firstHere) sub = 'Premier passage à ' + placeName(t) + '.';
     else if (after === before) sub = 'Une bière que tu connaissais déjà.';
@@ -977,7 +1152,7 @@ function openBar(id){
       <button class="btn ghost sm" id="bFav">${b.fav ? '❤️ Favori' : '🤍 Favori'}</button>
     </div>
     <button class="btn primary big" id="bStamp">🍺 Tamponner ici</button>
-    <p class="section-title" style="margin-left:0">${here.length ? 'Tes tampons ici' : 'Pas encore venue'}</p>
+    <p class="section-title" style="margin-left:0">${here.length ? 'Tes tampons ici' : gw('Pas encore venu', 'Pas encore venue', 'Pas encore de tampon ici')}</p>
     ${here.length ? `<ul class="top3">${here.map(t => `<li><span><button class="link" data-t="${t.id}">${esc(t.beer)}</button><br><span class="small muted">${fmtDay(parse(t.date))}</span></span><span class="gold">${t.rating ? stars(t.rating) : ''}</span></li>`).join('')}</ul>` : `<p class="small muted" style="margin-top:0">Ton premier tampon ici t’attend.</p>`}
     <label style="margin-top:16px">Mon avis sur le bar<textarea id="bNote" placeholder="L’ambiance, le barman, la meilleure table…">${esc(b.mynote || '')}</textarea></label>
     <div class="stack">
@@ -1019,11 +1194,57 @@ function openBarForm(b){
   };
 }
 
-/* réglages */
+/* profil : prénom, genre, photo. Pas de compte ni de mot de passe : tout reste sur le téléphone */
+function avatarFrom(file){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.width, img.height), c = document.createElement('canvas'); c.width = c.height = 256;
+      c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 256, 256);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('image illisible')); };
+    img.src = url;
+  });
+}
+function profileFields(){
+  return `<div class="av-edit"><button type="button" class="avatar big" id="avPick" aria-label="Choisir ta photo">${avatarHtml()}</button>
+      <div><button type="button" class="btn ghost sm" id="avPick2">📷 ${state.avatar ? 'Changer la photo' : 'Ajouter ta photo'}</button>
+      ${state.avatar ? '<button type="button" class="link small" id="avDel" style="display:block;margin-top:10px">Retirer la photo</button>' : ''}</div>
+      <input type="file" id="avIn" accept="image/*" hidden></div>
+    <label>Ton prénom<input type="text" name="owner" value="${esc(state.owner)}" autocomplete="given-name" placeholder="Ton prénom"></label>
+    <p class="flabel">Dans l’appli, on t’appelle</p>
+    <div class="genders">${[['m', 'Explorateur'], ['f', 'Exploratrice'], ['n', 'Neutre']].map(([v, l]) => `<label class="gopt"><input type="radio" name="gender" value="${v}" ${state.gender === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
+    <p class="small muted" style="margin:0 0 14px">Neutre : « Esprit Curieux », « Niveau Bronze »…</p>`;
+}
+function bindProfile(refresh){
+  const pick = () => $('#avIn').click();
+  $('#avPick').onclick = pick; $('#avPick2').onclick = pick;
+  $('#avIn').onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    try { state.avatar = await avatarFrom(f); save(); renderHeader(); refresh(); toast('Jolie photo 📷'); } catch(err){ toast('Cette image ne passe pas, essaie une autre.'); }
+  };
+  const del = $('#avDel'); if (del) del.onclick = () => { state.avatar = ''; save(); renderHeader(); refresh(); };
+}
+function readProfile(f){
+  const v = Object.fromEntries(new FormData(f).entries());
+  if (!v.gender) { toast('Choisis comment on t’appelle 🙂'); return null; }
+  state.owner = String(v.owner || '').trim(); state.gender = v.gender;
+  return v;
+}
+// le formulaire garde ce qui est tapé quand on change de photo
+function keepTyped(f){ const v = Object.fromEntries(new FormData(f).entries()); if (v.owner !== undefined) state.owner = String(v.owner).trim(); if (v.gender) state.gender = v.gender; }
+function openWelcome(){
+  showSheet(`<p class="eyebrow">Bienvenue dans Beer Me Up</p><h3>On fait connaissance ?</h3>
+    <p class="small muted" style="margin:0 0 16px">Pas de compte, pas de mot de passe : tout reste sur ton téléphone.</p>
+    <form id="wForm">${profileFields()}<button type="submit" class="btn primary big">C’est parti 🍻</button></form>`);
+  bindProfile(() => { keepTyped($('#wForm')); openWelcome(); });
+  $('#wForm').onsubmit = e => { e.preventDefault(); if (!readProfile(e.target)) return; save(); closeSheet(); renderAll(); toast(state.owner ? 'Salut ' + state.owner + ' 🍻' : 'C’est parti 🍻'); };
+}
 function openSettings(){
-  showSheet(`<h3>⚙️ Réglages</h3>
+  showSheet(`<h3>Ton profil</h3>
     <form id="sForm">
-      <label>Ton prénom<input type="text" name="owner" value="${esc(state.owner)}"></label>
+      ${profileFields()}
       <label>Son du tampon<select name="sound"><option value="1" ${state.settings.sound ? 'selected' : ''}>Oui</option><option value="0" ${state.settings.sound ? '' : 'selected'}>Non</option></select></label>
       <div class="sheet-actions"><button type="button" class="btn ghost" data-close>Fermer</button><button type="submit" class="btn primary">Enregistrer</button></div>
     </form>
@@ -1034,7 +1255,8 @@ function openSettings(){
       <button class="btn danger" id="btnReset">Tout effacer</button>
       <p class="small muted" style="margin:0">À consommer avec modération. L’abus d’alcool est dangereux pour la santé.</p>
     </div>`);
-  $('#sForm').onsubmit = e => { e.preventDefault(); const v = Object.fromEntries(new FormData(e.target).entries()); state.owner = String(v.owner || '').trim() || 'Aurore'; state.settings.sound = v.sound === '1' ? 1 : 0; save(); renderAll(); closeSheet(); toast('Réglages enregistrés'); };
+  bindProfile(() => { keepTyped($('#sForm')); openSettings(); });
+  $('#sForm').onsubmit = e => { e.preventDefault(); const v = readProfile(e.target); if (!v) return; state.settings.sound = v.sound === '1' ? 1 : 0; save(); renderAll(); closeSheet(); toast('Profil enregistré'); };
   $('#btnExport').onclick = exportData;
   $('#btnImport').onclick = () => $('#importInput').click();
   $('#btnReset').onclick = resetAll;
@@ -1074,14 +1296,15 @@ function toast(msg, undo){
 
 /* clics délégués */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act],[data-t],[data-bar],[data-q],[data-year],[data-wish-stamp],[data-wish-del]');
+  const el = e.target.closest('[data-act],[data-t],[data-bar],[data-q],[data-year],[data-wish-stamp],[data-wish-del],[data-view]');
   if (!el) return;
-  if (el.dataset.act === 'stamp') openTasting();
+  if (el.dataset.view) { barView = el.dataset.view; state.settings.barView = barView; save(); renderBars(); }
+  else if (el.dataset.act === 'stamp') openTasting();
   else if (el.dataset.act === 'newbar') openBarForm();
   else if (el.dataset.act === 'locate') {
     if (!navigator.geolocation) { toast('Position indisponible sur cet appareil'); return; }
     toast('Je cherche où tu es…');
-    navigator.geolocation.getCurrentPosition(p => { myPos = {lat:p.coords.latitude, lon:p.coords.longitude}; renderBars(); toast('Bars triés du plus proche 📍'); },
+    navigator.geolocation.getCurrentPosition(p => { myPos = {lat:p.coords.latitude, lon:p.coords.longitude}; renderBars(); if (map && barView === 'map') map.setView([myPos.lat, myPos.lon], 16); toast(barView === 'map' ? 'Te voilà sur la carte 📍' : 'Bars triés du plus proche 📍'); },
       () => toast("Je n'ai pas eu accès à ta position."), {enableHighAccuracy:false, timeout:12000, maximumAge:120000});
   }
   else if (el.dataset.t) openDetail(el.dataset.t);
@@ -1102,6 +1325,7 @@ document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.nav[data-tab]').forEach(x => x.classList.toggle('active', x === b));
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === 'tab-' + b.dataset.tab));
   window.scrollTo(0, 0);
+  if (b.dataset.tab === 'bars' && map) setTimeout(() => map.invalidateSize(), 30);
 });
 
 /* les happy hours bougent avec l'heure */
@@ -1115,6 +1339,15 @@ if (!canStore) {
 }
 save();
 renderAll();
+const splash = $('#splash');
+let splashGone = false;
+function endSplash(){
+  if (splashGone) return; splashGone = true;
+  splash.classList.add('out'); setTimeout(() => splash.remove(), 500);
+  if (!state.gender) setTimeout(openWelcome, 380);
+}
+splash.addEventListener('click', endSplash);
+setTimeout(endSplash, matchMedia('(prefers-reduced-motion: reduce)').matches ? 600 : 2400);
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
 })();
 </script>
