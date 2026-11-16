@@ -290,6 +290,24 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 @keyframes brandIn{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sp-liquid,.sp-foam,.splash-brand{animation-duration:.01s;animation-delay:0s}.sp-bub circle,.pin.hh{animation:none}}
 .sheet-grab{position:absolute;top:8px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:var(--line);z-index:3;pointer-events:none}
+.qbars{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.qbar{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;min-height:56px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:var(--surface-2);font-size:16px;color:var(--ink)}
+.qbar span{flex:none;font-size:13px;color:var(--muted);font-weight:600}
+.qbeers{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.qbeer{min-height:48px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);font-size:15px;font-weight:600;color:var(--ink);text-align:left}
+.qbeer small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.qbeer.wish{background:var(--amber);border-color:var(--amber);color:var(--on-amber)}
+.qbeer.wish small{color:var(--on-amber);opacity:.8}
+.qbeer:active,.qbar:active{transform:scale(.97)}
+.qsugg{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 12px}
+.qsugg:empty{display:none}
+.fxextra{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transition:opacity .3s .6s}
+.fx.slam .fxextra{opacity:1}
+.fxrate{display:flex;gap:4px}
+.fxrate button{background:none;border:0;font-size:34px;line-height:1;padding:4px;color:rgba(255,246,224,.45)}
+.fxrate button.on{color:var(--amber)}
+.fxlinks{display:flex;gap:18px}
+.fxlinks button{background:none;border:0;color:var(--foam);font-size:14px;text-decoration:underline;text-underline-offset:3px;opacity:.85;padding:6px}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
@@ -359,7 +377,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 </nav>
 
 <div id="sheet" class="sheet-wrap" hidden><div class="sheet-box"><span class="sheet-grab" aria-hidden="true"></span><button type="button" class="sheet-x" data-close aria-label="Fermer">×</button><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div></div>
-<div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p></div>
+<div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p><div class="fxextra" id="fxExtra"></div></div>
 <div id="toast" class="toast" role="status"></div>
 <input type="file" id="photoInput" accept="image/*" hidden>
 <input type="file" id="importInput" accept="application/json,.json" hidden>
@@ -683,8 +701,23 @@ function thump(delay){
     n.connect(f).connect(ng).connect(actx.destination); n.start(t0);
   } catch(e){}
 }
-function playStamp(t, msg, sub){
+function playStamp(t, msg, sub, quick){
   const fx = $('#fx');
+  $('#fxExtra').innerHTML = quick ? `<div class="fxrate">${[1,2,3,4,5].map(i => `<button type="button" data-fxstar="${i}" aria-label="${i} sur 5">★</button>`).join('')}</div>
+    <div class="fxlinks"><button type="button" id="fxMore">＋ Un souvenir, une photo</button><button type="button" id="fxUndo">Annuler</button></div>` : '';
+  if (quick) {
+    $('#fxExtra').onclick = e => {
+      e.stopPropagation();
+      const s = e.target.closest('[data-fxstar]');
+      if (s) {
+        t.rating = +s.dataset.fxstar; save(); renderAll();
+        $('#fxExtra').querySelectorAll('[data-fxstar]').forEach(x => x.classList.toggle('on', +x.dataset.fxstar <= t.rating));
+        $('#fxStamp').innerHTML = stampSvg(t);
+        clearTimeout(playStamp.timer); playStamp.timer = setTimeout(closeFx, 1600);
+      } else if (e.target.id === 'fxMore') { closeFx(); setTimeout(() => openTasting(Object.assign({}, t)), 260); }
+      else if (e.target.id === 'fxUndo') { closeFx(); undoStamp(t); }
+    };
+  }
   $('#fxStamp').innerHTML = stampSvg(t);
   $('#fxStamp').style.setProperty('--r', rot(t) + 'deg');
   $('#fxMsg').innerHTML = esc(msg) + (sub ? '<small>' + esc(sub) + '</small>' : '');
@@ -696,7 +729,7 @@ function playStamp(t, msg, sub){
     setTimeout(() => { try { navigator.vibrate && navigator.vibrate(30); } catch(e){} }, 260);
   }, 20); });
   clearTimeout(playStamp.timer);
-  playStamp.timer = setTimeout(closeFx, 3200);
+  playStamp.timer = setTimeout(closeFx, quick ? 5000 : 3200);
 }
 function closeFx(){ const fx = $('#fx'); clearTimeout(playStamp.timer); fx.classList.remove('on', 'slam'); setTimeout(() => { fx.hidden = true; }, 250); }
 $('#fx').addEventListener('click', closeFx);
@@ -971,7 +1004,7 @@ let sheetTimer = null;
 // le geste ou le bouton retour du téléphone ferme la feuille au lieu de quitter l'appli
 let sheetHist = false, popPending = false;
 function showSheet(html){
-  clearTimeout(sheetTimer); const w = $('#sheet'); $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0; w.hidden = false; requestAnimationFrame(() => w.classList.add('open'));
+  $('#sheetBody').onclick = null; clearTimeout(sheetTimer); const w = $('#sheet'); $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0; w.hidden = false; requestAnimationFrame(() => w.classList.add('open'));
   if (!sheetHist) { sheetHist = true; if (!popPending) { try { history.pushState({bmuSheet:1}, ''); } catch(e){} } }
 }
 function closeSheet(fromPop){
@@ -1097,22 +1130,105 @@ function openTasting(pre){
     else if (pendingPhotoRemoved && t.photoId) { delPhoto(t.photoId); delete t.photoId; }
     if (!edit) { t.ink = pickInk(); state.tastings.push(t); }
     // rayer des envies
-    const crossed = state.wishes.filter(w => norm(w.beer) === norm(beer));
-    if (crossed.length) state.wishes = state.wishes.filter(w => norm(w.beer) !== norm(beer));
+    const crossed = state.wishes.filter(w => wishMatches(w, beer));
+    if (crossed.length) state.wishes = state.wishes.filter(w => !wishMatches(w, beer));
     save(); closeSheet(); renderAll();
     if (edit) { toast('Tampon modifié'); return; }
-    const after = distinctBeers(), lvB = levelOf(before), lvA = levelOf(after);
-    const firstHere = barId && state.tastings.filter(x => x.barId === barId).length === 1;
-    let msg = 'Tampon n°' + state.tastings.length, sub = '';
-    if (lvA !== lvB) { msg = lvA.icon + ' ' + statusName(lvA) + ' !'; sub = 'Nouveau statut débloqué avec ' + plural(after, 'bière') + ' différente' + (after > 1 ? 's' : '') + '.'; }
-    else if (after > before && after === 1) sub = 'Ta toute première bière. Le passeport est lancé.';
-    else if (firstHere) sub = 'Premier passage à ' + placeName(t) + '.';
-    else if (after === before) sub = 'Une bière que tu connaissais déjà.';
-    else sub = 'Une nouvelle bière au compteur.';
-    if (crossed.length) sub += ' Rayée de tes envies.';
-    playStamp(t, msg, sub);
-    maybeRemindBackup();
+    celebrate(t, before, crossed.length);
   };
+}
+function celebrate(t, before, crossed, quick){
+  const after = distinctBeers(), lvB = levelOf(before), lvA = levelOf(after);
+  const firstHere = t.barId && state.tastings.filter(x => x.barId === t.barId).length === 1;
+  let msg = 'Tampon n°' + state.tastings.length, sub = '';
+  if (lvA !== lvB) { msg = lvA.icon + ' ' + statusName(lvA) + ' !'; sub = 'Nouveau statut débloqué avec ' + plural(after, 'bière') + ' différente' + (after > 1 ? 's' : '') + '.'; }
+  else if (after > before && after === 1) sub = 'Ta toute première bière. Le passeport est lancé.';
+  else if (firstHere) sub = 'Premier passage à ' + placeName(t) + '.';
+  else if (after === before) sub = 'Une bière que tu connaissais déjà.';
+  else sub = 'Une nouvelle bière au compteur.';
+  if (crossed) sub += ' Rayée de tes envies.';
+  playStamp(t, msg, sub, quick);
+  maybeRemindBackup();
+}
+// une envie est rayée si la bière tamponnée la contient (« Chouffe » est rayée par « La Chouffe Blonde »)
+function wishMatches(w, beer){ const a = norm(w.beer), b = norm(beer); return a === b || (a.length >= 4 && b.includes(a)); }
+let lastCrossed = [];
+function quickStamp(barId, beer){
+  beer = String(beer || '').trim(); if (!beer) return;
+  const i = beerInfo(beer), before = distinctBeers();
+  const t = {id:uid(), created:Date.now(), beer, brewery:i ? i[2] : '', style:(i && infoStyle(i)) || 'autre', service:'pression',
+    barId:barId || null, place:'', rating:0, date:iso(today()), comment:''};
+  if (i && i[0] != null) t.abv = i[0];
+  t.ink = pickInk(); state.tastings.push(t);
+  lastCrossed = state.wishes.filter(w => wishMatches(w, beer));
+  if (lastCrossed.length) state.wishes = state.wishes.filter(w => !wishMatches(w, beer));
+  save(); closeSheet(); renderAll();
+  celebrate(t, before, lastCrossed.length, true);
+}
+function undoStamp(t){
+  state.tastings = state.tastings.filter(x => x.id !== t.id);
+  state.wishes = state.wishes.concat(lastCrossed); lastCrossed = [];
+  save(); renderAll(); toast('Tampon annulé');
+}
+
+/* tampon rapide : l'appli devine le bar, on touche sa bière, c'est fait */
+function nearestBars(n){ return myPos ? state.bars.filter(b => b.lat != null).sort((a, b) => dist(a) - dist(b)).slice(0, n) : []; }
+let qsToken = 0;
+function openQuickStamp(barId, beer){
+  const tok = ++qsToken;
+  if (barId) { quickForBar(barId, false, beer); return; }
+  showSheet(`<p class="eyebrow">Tamponner</p><h3>🍺 Tu es où ?</h3><p class="muted" style="margin:0">Je cherche le bar le plus proche…</p>`);
+  const go = () => {
+    if (tok !== qsToken || $('#sheet').hidden) return;
+    const near = nearestBars(3);
+    if (near[0] && dist(near[0]) <= 60) quickForBar(near[0].id, true, beer); else quickChooser(near, beer);
+  };
+  if (myPos && Date.now() - myPos.at < 120000) go(); else refreshPos(true, go);
+}
+function quickChooser(near, beer){
+  showSheet(`<p class="eyebrow">Tamponner${beer ? ' ' + esc(beer) : ''}</p><h3>🍺 Tu es où ?</h3>
+    ${near.length ? `<div class="qbars">${near.map(b => `<button type="button" class="qbar" data-qs-bar="${b.id}"><strong>${esc(b.name)}</strong><span>${fmtDist(dist(b))}</span></button>`).join('')}</div>`
+      : `<p class="small muted">Je n’ai pas ta position. Choisis le bar dans la liste.</p>`}
+    <label>${near.length ? 'Un autre bar' : 'Le bar'}<select id="qsSel">${barOptions('')}</select></label>`);
+  $('#sheetBody').onclick = e => { const b = e.target.closest('[data-qs-bar]'); if (b) quickForBar(b.dataset.qsBar, false, beer); };
+  $('#qsSel').onchange = e => {
+    const v = e.target.value; if (!v) return;
+    if (v === '__other' || v === '__new') {
+      openTasting({beer:beer || ''});
+      const s = $('#tBar'); s.value = v; s.dispatchEvent(new Event('change'));
+    } else quickForBar(v, false, beer);
+  };
+}
+function beerSuggestions(q){
+  q = norm(q); if (q.length < 3) return [];
+  const pool = [...new Set(state.tastings.map(t => t.beer).concat(state.wishes.map(w => w.beer), ALL_BEERS))];
+  return pool.filter(x => beerText(x).includes(q)).slice(0, 6);
+}
+function quickForBar(id, guessed, beer){
+  const b = barById(id); if (!b) return;
+  const beers = (b.beers || []).slice();
+  const wish = beer ? [beer] : state.wishes.map(w => w.beer).filter(w => beers.some(x => wishMatches({beer:w}, x)));
+  const chip = (x, cls) => `<button type="button" class="qbeer ${cls || ''}" data-qs-beer="${esc(x)}">${esc(x)}${beerMeta(x) ? `<small>${esc(beerMeta(x))}</small>` : ''}</button>`;
+  showSheet(`<p class="eyebrow">${guessed ? 'Tu es ici ?' : 'Tamponner ici'}</p>
+    <h3>${esc(b.name)}</h3>
+    ${guessed ? '<p style="margin:-4px 0 12px"><button type="button" class="link small" id="qsNotHere">Non, je suis ailleurs</button></p>' : ''}
+    ${beer ? `<div class="qbeers">${chip(beer, 'wish')}</div>` : ''}
+    ${beers.length ? `<p class="flabel">${beer ? 'Ou une bière de la carte' : 'Touche ta bière'}</p><div class="qbeers">${beers.map(x => chip(x, wish.some(w => wishMatches({beer:w}, x)) ? 'wish' : '')).join('')}</div>` : ''}
+    <label>${beers.length || beer ? 'Une autre bière' : 'Ta bière'}<input type="text" id="qsBeer" placeholder="Tape au moins 3 lettres" autocomplete="off" enterkeyhint="done"></label>
+    <div class="qsugg" id="qsSugg"></div>
+    <button type="button" class="btn primary big" id="qsGo" hidden>🍺 Tamponner</button>
+    <p style="margin:14px 0 0;text-align:center"><button type="button" class="link small" id="qsFull">Saisie détaillée (note, photo, date…)</button></p>`);
+  $('#sheetBody').onclick = e => { const c = e.target.closest('[data-qs-beer]'); if (c) quickStamp(id, c.dataset.qsBeer); };
+  const inp = $('#qsBeer');
+  inp.oninput = () => {
+    const v = inp.value.trim();
+    $('#qsGo').hidden = !v;
+    $('#qsSugg').innerHTML = beerSuggestions(v).map(x => chip(x)).join('');
+  };
+  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); quickStamp(id, inp.value); } };
+  $('#qsGo').onclick = () => quickStamp(id, inp.value);
+  $('#qsFull').onclick = () => openTasting({barId:id, beer:inp.value.trim() || beer || ''});
+  const nh = $('#qsNotHere'); if (nh) nh.onclick = () => quickChooser(nearestBars(4).filter(x => x.id !== id), beer);
 }
 $('#photoInput').addEventListener('change', async e => {
   const file = e.target.files && e.target.files[0]; e.target.value = ''; if (!file) return;
@@ -1199,8 +1315,8 @@ function openBar(id){
       <button class="btn ghost" id="bEdit">✏️ Modifier le bar</button>
       <button class="btn danger" id="bDel">Retirer ce bar</button>
     </div>`);
-  $('#bStamp').onclick = () => openTasting({barId:id});
-  document.querySelectorAll('[data-beer-stamp]').forEach(el => { el.onclick = () => openTasting({barId:id, beer:el.dataset.beerStamp}); });
+  $('#bStamp').onclick = () => openQuickStamp(id);
+  document.querySelectorAll('[data-beer-stamp]').forEach(el => { el.onclick = () => quickStamp(id, el.dataset.beerStamp); });
   $('#bFav').onclick = () => { b.fav = !b.fav; save(); renderBars(); $('#bFav').textContent = b.fav ? '❤️ Favori' : '🤍 Favori'; };
   $('#bNote').onchange = e => { b.mynote = e.target.value.trim(); save(); toast('Avis enregistré'); };
   $('#bEdit').onclick = () => openBarForm(b);
@@ -1366,7 +1482,7 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-act],[data-t],[data-bar],[data-q],[data-year],[data-wish-stamp],[data-wish-del],[data-view]');
   if (!el) return;
   if (el.dataset.view) { barView = el.dataset.view; state.settings.barView = barView; save(); renderBars(); }
-  else if (el.dataset.act === 'stamp') openTasting();
+  else if (el.dataset.act === 'stamp') openQuickStamp();
   else if (el.dataset.act === 'newbar') openBarForm();
   else if (el.dataset.act === 'locate') {
     if (!navigator.geolocation) { toast('Position indisponible sur cet appareil'); return; }
@@ -1376,14 +1492,14 @@ document.addEventListener('click', e => {
   else if (el.dataset.bar) openBar(el.dataset.bar);
   else if (el.dataset.q) { barFilter = el.dataset.q; renderBars(); }
   else if (el.dataset.year) { year = el.dataset.year; renderAnnee(); }
-  else if (el.dataset.wishStamp) { const w = state.wishes.find(x => x.id === el.dataset.wishStamp); if (w) openTasting({beer:w.beer}); }
+  else if (el.dataset.wishStamp) { const w = state.wishes.find(x => x.id === el.dataset.wishStamp); if (w) openQuickStamp(null, w.beer); }
   else if (el.dataset.wishDel) {
     const i = state.wishes.findIndex(x => x.id === el.dataset.wishDel); if (i < 0) return;
     const [w] = state.wishes.splice(i, 1); save(); renderEnvies();
     toast('Retirée de tes envies', () => { state.wishes.push(w); save(); renderEnvies(); });
   }
 });
-$('#btnStamp').onclick = () => openTasting();
+$('#btnStamp').onclick = () => openQuickStamp();
 
 /* onglets */
 document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
