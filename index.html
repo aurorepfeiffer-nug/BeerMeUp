@@ -289,6 +289,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 .splash-brand em{font-style:normal;color:var(--foam)}
 @keyframes brandIn{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sp-liquid,.sp-foam,.splash-brand{animation-duration:.01s;animation-delay:0s}.sp-bub circle,.pin.hh{animation:none}}
+.sheet-grab{position:absolute;top:8px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:var(--line);z-index:3;pointer-events:none}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
@@ -357,7 +358,7 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
   </div>
 </nav>
 
-<div id="sheet" class="sheet-wrap" hidden><div class="sheet-box"><button type="button" class="sheet-x" data-close aria-label="Fermer">×</button><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div></div>
+<div id="sheet" class="sheet-wrap" hidden><div class="sheet-box"><span class="sheet-grab" aria-hidden="true"></span><button type="button" class="sheet-x" data-close aria-label="Fermer">×</button><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div></div>
 <div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p></div>
 <div id="toast" class="toast" role="status"></div>
 <input type="file" id="photoInput" accept="image/*" hidden>
@@ -962,6 +963,25 @@ function closeSheet(fromPop){
   const w = $('#sheet'); w.classList.remove('open'); clearTimeout(sheetTimer); sheetTimer = setTimeout(() => { w.hidden = true; $('#sheetBody').innerHTML = ''; }, 200);
   if (sheetHist) { sheetHist = false; if (fromPop !== true) { popPending = true; try { history.back(); } catch(e){ popPending = false; } } }
 }
+// tirer la fiche vers le bas pour la fermer (le geste habituel sur téléphone)
+(function(){
+  const box = $('.sheet-box'), body = $('#sheetBody'); let y0 = null, dy = 0, drag = false;
+  box.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || e.target.closest('input,textarea,select,.leaflet-container')) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0; drag = body.scrollTop <= 0;
+  }, {passive:true});
+  box.addEventListener('touchmove', e => {
+    if (y0 == null || !drag) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy > 0) { box.style.transition = 'none'; box.style.transform = `translateY(${dy}px)`; if (e.cancelable) e.preventDefault(); }
+  }, {passive:false});
+  const end = () => {
+    if (y0 == null) return; y0 = null;
+    box.style.transition = ''; box.style.transform = '';
+    if (drag && dy > 90) closeSheet();
+  };
+  box.addEventListener('touchend', end); box.addEventListener('touchcancel', end);
+})();
 window.addEventListener('popstate', () => {
   if (popPending) { popPending = false; if (sheetHist) { try { history.pushState({bmuSheet:1}, ''); } catch(e){} } return; }
   if (sheetHist) closeSheet(true);
