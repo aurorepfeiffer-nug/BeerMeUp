@@ -324,6 +324,14 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 .maplocate{position:absolute;top:10px;right:10px;z-index:500;width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);box-shadow:0 3px 10px rgba(0,0,0,.3);font-size:20px;display:grid;place-items:center}
 .maplocate.on{background:var(--amber)}
 .barsfoot{display:flex;justify-content:center;margin:4px 0 0}
+.wcards{display:flex;flex-direction:column;gap:10px}
+.wcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 14px 12px;box-shadow:var(--shadow);position:relative}
+.wcard .t{font-family:var(--display);font-size:19px;line-height:1.2;padding-right:30px}
+.wcard .where{font-size:13px;color:var(--muted);margin:3px 0 10px}
+.wcard .where b{color:var(--amber-deep)}
+.wcard .row .btn{flex:none}
+.wcard .del{position:absolute;top:8px;right:6px}
+.ideas{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
@@ -971,20 +979,41 @@ function showMap(list, now, visited, emptyMsg, servesLine, hhLine){
   });
 }
 
+function barsServing(beer){ const q = norm(beer); return q.length < 3 ? [] : state.bars.filter(b => (b.beers || []).some(x => beerText(x).includes(q))); }
+// des idées : les bières les plus servies que tu n'as pas encore goûtées
+function wishIdeas(n){
+  const tasted = new Set(state.tastings.map(t => norm(t.beer))), wished = new Set(state.wishes.map(w => norm(w.beer)));
+  const c = {}; state.bars.forEach(b => (b.beers || []).forEach(x => { c[x] = (c[x] || 0) + 1; }));
+  return Object.keys(c).filter(x => !tasted.has(norm(x)) && !wished.has(norm(x)) && !isNA(x)).sort((a, b) => c[b] - c[a] || a.localeCompare(b, 'fr')).slice(0, n);
+}
 function renderEnvies(){
   const w = state.wishes.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
+  const ideas = wishIdeas(6);
   $('#tab-envies').innerHTML = `<div class="card">
-      <p class="eyebrow">À goûter</p><h2>Ta liste d’envies</h2>
-      <p class="small muted" style="margin-top:0">Une bière dont on t’a parlé, vue sur une carte, conseillée par un barman. Quand tu la goûtes, elle se raye toute seule.</p>
-      <form class="wish-add" id="wishForm"><input type="text" name="beer" placeholder="Le nom de la bière" required autocomplete="off" aria-label="Bière à goûter"><button class="btn primary" type="submit">Ajouter</button></form>
+      <p class="eyebrow">À goûter</p><h2>Tes envies de bières</h2>
+      <p class="small muted" style="margin-top:0">Note une bière, je te dis où la boire. Quand tu la tamponnes, elle se raye toute seule.</p>
+      <form class="wish-add" id="wishForm"><input type="text" name="beer" placeholder="Chouffe, Triple Karmeliet…" required autocomplete="off" aria-label="Bière à goûter"><button class="btn primary" type="submit">Ajouter</button></form>
+      ${ideas.length ? `<p class="flabel" style="margin:14px 0 0">Envie d’idées ? Les plus servies que tu n’as pas goûtées</p>
+      <div class="ideas">${ideas.map(x => `<button type="button" class="chip-beer" data-idea="${esc(x)}">＋ ${esc(x)}</button>`).join('')}</div>` : ''}
     </div>
-    <div class="card">${w.length ? `<ul class="wlist">${w.map(x => `<li><div class="b"><div class="t">${esc(x.beer)}</div>${x.where ? `<div class="small muted">${esc(x.where)}</div>` : ''}</div>
-        <button class="btn primary sm" data-wish-stamp="${x.id}">🍺 Goûtée</button><button class="del" data-wish-del="${x.id}" aria-label="Retirer">×</button></li>`).join('')}</ul>`
-      : `<div class="empty"><div class="e">📝</div><p>Ta liste est vide. Note ici la prochaine bière qui te fait de l’œil.</p></div>`}</div>`;
+    ${w.length ? `<div class="wcards">${w.map(x => { const n = barsServing(x.beer).length; return `<div class="wcard">
+        <div class="t">${esc(x.beer)}</div>
+        <div class="where">${n ? `🍺 Servie dans <b>${plural(n, 'bar')}</b>` : 'Pas encore repérée dans nos bars'}</div>
+        <div class="row">${n ? `<button class="btn primary sm" data-wish-map="${x.id}">🗺️ Où la boire</button>` : ''}<button class="btn ghost sm" data-wish-stamp="${x.id}">✓ Goûtée</button></div>
+        <button class="del" data-wish-del="${x.id}" aria-label="Retirer">×</button></div>`; }).join('')}</div>`
+      : `<div class="card empty"><div class="e">📝</div><p>Ta liste est vide. Note la prochaine bière qui te fait de l’œil.</p></div>`}`;
   $('#wishForm').onsubmit = e => {
     e.preventDefault(); const v = e.target.beer.value.trim(); if (!v) return;
-    state.wishes.push({id:uid(), beer:v, created:Date.now()}); save(); renderEnvies(); toast('Ajoutée à tes envies 📝');
+    state.wishes.push({id:uid(), beer:v, created:Date.now()}); save(); renderEnvies();
+    const n = barsServing(v).length; toast(n ? `Servie dans ${plural(n, 'bar')} 🍺` : 'Ajoutée à tes envies 📝');
   };
+  document.querySelectorAll('[data-idea]').forEach(b => b.onclick = () => { state.wishes.push({id:uid(), beer:b.dataset.idea, created:Date.now()}); save(); renderEnvies(); toast('Ajoutée à tes envies 📝'); });
+}
+// montrer sur la carte les bars qui servent une bière
+function showBeerOnMap(beer){
+  beerQ = beer; barQuarter = ''; barOn = {}; mapSel = null; mapFit = true; barView = 'map';
+  document.querySelector('.nav[data-tab="bars"]').click();
+  renderBars();
 }
 
 let year = null;
@@ -1517,6 +1546,7 @@ document.addEventListener('click', e => {
   else if (el.dataset.bar) openBar(el.dataset.bar);
   else if (el.dataset.tog) { const k = el.dataset.tog; barOn[k] = !barOn[k]; if (barOn[k] && k === 'fresh') barOn.seen = false; if (barOn[k] && k === 'seen') barOn.fresh = false; mapFit = true; renderBars(); }
   else if (el.dataset.year) { year = el.dataset.year; renderAnnee(); }
+  else if (el.dataset.wishMap) { const w = state.wishes.find(x => x.id === el.dataset.wishMap); if (w) showBeerOnMap(w.beer); }
   else if (el.dataset.wishStamp) { const w = state.wishes.find(x => x.id === el.dataset.wishStamp); if (w) openQuickStamp(null, w.beer); }
   else if (el.dataset.wishDel) {
     const i = state.wishes.findIndex(x => x.id === el.dataset.wishDel); if (i < 0) return;
