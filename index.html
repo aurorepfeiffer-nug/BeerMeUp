@@ -778,7 +778,21 @@ function fmtDays(d){
   const l = set.map(x => DAYS_L[x - 1]); l[0] = l[0][0].toUpperCase() + l[0].slice(1); return l.join(', ');
 }
 const fmtDist = m => m == null ? '' : m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
-let barView = null, mapSel = null, map = null, pinLayer = null, meDot = null;
+let barView = null, mapSel = null, map = null, pinLayer = null, meDot = null, centeredOnMe = false;
+// position du téléphone : demandée une fois, puis rafraîchie en silence à chaque ouverture
+const nearStrasbourg = p => Math.abs(p.lat - 48.58) < .15 && Math.abs(p.lon - 7.75) < .2;
+function refreshPos(silent, cb){
+  if (!navigator.geolocation) { if (!silent) toast('Position indisponible sur cet appareil'); if (cb) cb(false); return; }
+  if (!silent) toast('Je cherche où tu es…');
+  navigator.geolocation.getCurrentPosition(p => {
+    myPos = {lat:p.coords.latitude, lon:p.coords.longitude, at:Date.now()};
+    if (!state.settings.geo) { state.settings.geo = 1; save(); }
+    renderBars();
+    if (map && !centeredOnMe && nearStrasbourg(myPos)) { centeredOnMe = true; map.setView([myPos.lat, myPos.lon], 16); }
+    if (cb) cb(true);
+  }, () => { if (!silent) toast("Je n'ai pas eu accès à ta position."); if (cb) cb(false); },
+  {enableHighAccuracy:true, timeout:9000, maximumAge:60000});
+}
 function barsSkeleton(){
   if ($('#barsTop')) return;
   $('#tab-bars').innerHTML = `<div id="barsTop"></div>
@@ -867,7 +881,8 @@ function showMap(list, now, visited, emptyMsg, servesLine, hhLine){
       map.on('click', () => { if (mapSel) { mapSel = null; renderBars(); } });
       // premier cadrage : le centre de gravité des bars du centre-ville, assez près pour les distinguer
       const pts = state.bars.filter(b => b.lat != null && Math.abs(b.lat - 48.583) < .012 && Math.abs(b.lon - 7.75) < .018);
-      if (pts.length) { const m = k => pts.reduce((s, b) => s + b[k], 0) / pts.length; map.setView([m('lat'), m('lon')], 15); }
+      if (myPos && nearStrasbourg(myPos)) { centeredOnMe = true; map.setView([myPos.lat, myPos.lon], 16); }
+      else if (pts.length) { const m = k => pts.reduce((s, b) => s + b[k], 0) / pts.length; map.setView([m('lat'), m('lon')], 15); }
     }
     $('#mapMsg').hidden = true;
     pinLayer.clearLayers();
@@ -1355,9 +1370,7 @@ document.addEventListener('click', e => {
   else if (el.dataset.act === 'newbar') openBarForm();
   else if (el.dataset.act === 'locate') {
     if (!navigator.geolocation) { toast('Position indisponible sur cet appareil'); return; }
-    toast('Je cherche où tu es…');
-    navigator.geolocation.getCurrentPosition(p => { myPos = {lat:p.coords.latitude, lon:p.coords.longitude}; renderBars(); if (map && barView === 'map') map.setView([myPos.lat, myPos.lon], 16); toast(barView === 'map' ? 'Te voilà sur la carte 📍' : 'Bars triés du plus proche 📍'); },
-      () => toast("Je n'ai pas eu accès à ta position."), {enableHighAccuracy:false, timeout:12000, maximumAge:120000});
+    refreshPos(false, ok => { if (!ok) return; if (map && barView === 'map') { centeredOnMe = true; map.setView([myPos.lat, myPos.lon], 16); } toast(barView === 'map' ? 'Te voilà sur la carte 📍' : 'Bars triés du plus proche 📍'); });
   }
   else if (el.dataset.t) openDetail(el.dataset.t);
   else if (el.dataset.bar) openBar(el.dataset.bar);
@@ -1382,7 +1395,7 @@ document.querySelectorAll('.nav[data-tab]').forEach(b => b.onclick = () => {
 
 /* les happy hours bougent avec l'heure */
 setInterval(() => { if ($('#tab-bars').classList.contains('active')) renderBars(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) renderBars(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) return; renderBars(); if (state.settings.geo && (!myPos || Date.now() - myPos.at > 120000)) refreshPos(true); });
 
 /* démarrage */
 if (!canStore) {
@@ -1391,6 +1404,11 @@ if (!canStore) {
 }
 save();
 renderAll();
+(function(){
+  const go = () => refreshPos(true);
+  if (state.settings.geo) { go(); return; }
+  try { navigator.permissions.query({name:'geolocation'}).then(r => { if (r.state === 'granted') go(); }).catch(() => {}); } catch(e){}
+})();
 const splash = $('#splash');
 let splashGone = false;
 function endSplash(){
