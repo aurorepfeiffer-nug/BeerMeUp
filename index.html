@@ -359,7 +359,31 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 .dicebeer{background:var(--amber-soft);border-radius:16px;padding:12px 14px;margin:12px 0 14px;display:flex;flex-direction:column;gap:2px}
 .dicebeer strong{font-family:var(--display);font-size:23px;line-height:1.15;font-weight:400}
 .dicebeer .eyebrow{margin:0;color:var(--amber-deep)}
-@media (prefers-reduced-motion:reduce){.dice.roll .die{animation-duration:.01s}}
+/* l'oracle de la mousse */
+.oracle{position:fixed;inset:0;z-index:60;background:radial-gradient(circle at 50% 40%,rgba(74,44,26,.92),rgba(14,8,4,.96));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px}
+.oracle .gw{position:relative;width:230px;height:317px}
+.oracle .gw svg{width:100%;height:100%;overflow:visible}
+.oracle.shake .gw{animation:slosh .5s ease-in-out 2}
+@keyframes slosh{0%,100%{transform:rotate(0)}20%{transform:rotate(-11deg) translateX(-8px)}50%{transform:rotate(9deg) translateX(8px)}80%{transform:rotate(-5deg)}}
+.oracle .surf{transition:transform 1.2s cubic-bezier(.2,.8,.3,1)}
+.oracle.shake .surf{animation:waves .25s ease-in-out infinite alternate}
+@keyframes waves{from{transform:translateY(-6px) skewY(-6deg)}to{transform:translateY(6px) skewY(6deg)}}
+.oracle .foam circle{transform-box:fill-box;transform-origin:center}
+.oracle.shake .foam circle{animation:churn .3s ease-in-out infinite alternate}
+.oracle.shake .foam circle:nth-child(2n){animation-delay:.15s}
+@keyframes churn{from{transform:scale(.8)}to{transform:scale(1.3)}}
+.oracle .fizz circle{animation:fizz 1.4s linear infinite;opacity:0}
+.oracle .fizz circle:nth-child(2){animation-delay:.3s}.oracle .fizz circle:nth-child(3){animation-delay:.6s}.oracle .fizz circle:nth-child(4){animation-delay:.9s}.oracle .fizz circle:nth-child(5){animation-delay:.45s}.oracle .fizz circle:nth-child(6){animation-delay:1.1s}
+.oracle.shake .fizz circle{animation-duration:.45s}
+@keyframes fizz{0%{transform:translateY(0);opacity:0}15%{opacity:.85}100%{transform:translateY(-150px);opacity:0}}
+.oracle .omsg{position:absolute;left:50%;top:58%;width:156px;transform:translate(-50%,-50%) translateY(46px) scale(.7);opacity:0;filter:blur(7px);transition:opacity 1.1s ease,transform 1.3s cubic-bezier(.2,.8,.3,1),filter 1.1s ease;text-align:center;pointer-events:none}
+.oracle.reveal .omsg{opacity:1;transform:translate(-50%,-50%) rotate(-3deg);filter:none;animation:float 3s 1.3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(-50%,-50%) rotate(-3deg)}50%{transform:translate(-50%,-56%) rotate(2deg)}}
+.oracle .omsg .tri{display:block;background:rgba(43,26,16,.82);color:#FFF6E0;border-radius:14px;padding:10px 8px;box-shadow:0 0 18px rgba(43,26,16,.5),inset 0 0 0 1px rgba(255,246,224,.18)}
+.oracle .omsg b{display:block;font-family:var(--display);font-weight:400;font-size:19px;line-height:1.1}
+.oracle .omsg small{display:block;font-size:13px;line-height:1.25;margin-top:6px;opacity:.9}
+.oracle .msg{color:var(--foam);font-family:var(--display);font-size:24px;margin:0;text-align:center;min-height:26px}
+@media (prefers-reduced-motion:reduce){.oracle *{animation:none!important;transition-duration:.01s!important}}
 @media (max-width:360px){.brand{font-size:30px}.hbar{grid-template-columns:90px 1fr 24px}}
 </style>
 </head>
@@ -430,7 +454,28 @@ label > input,label > select,label > textarea{margin-top:6px;color:var(--ink)}
 
 <div id="sheet" class="sheet-wrap" hidden><div class="sheet-box"><span class="sheet-grab" aria-hidden="true"></span><button type="button" class="sheet-x" data-close aria-label="Fermer">×</button><div class="sheet" id="sheetBody" role="dialog" aria-modal="true"></div></div></div>
 <div id="fx" class="fx" hidden><div class="paper"><div class="ring"></div><div class="st" id="fxStamp"></div></div><p class="msg" id="fxMsg"></p><div class="fxextra" id="fxExtra"></div></div>
-<div id="dice" class="dice" hidden aria-hidden="true"><div class="die" id="dieFace"></div><p class="msg">Le dé roule…</p></div>
+<div id="dice" class="oracle" hidden aria-hidden="true">
+  <div class="gw">
+    <svg viewBox="0 0 190 262">
+      <defs>
+        <clipPath id="oClip"><path d="M30 30 H160 L148 236 Q147 248 135 248 H55 Q43 248 42 236 Z"/></clipPath>
+        <linearGradient id="oBeer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7C35C"/><stop offset=".6" stop-color="#D98A12"/><stop offset="1" stop-color="#9C5A08"/></linearGradient>
+      </defs>
+      <g clip-path="url(#oClip)">
+        <rect x="0" y="0" width="190" height="262" fill="rgba(255,246,224,.06)"/>
+        <g class="surf">
+          <rect x="-20" y="64" width="230" height="220" fill="url(#oBeer)"/>
+          <g class="fizz" fill="rgba(255,246,224,.75)"><circle cx="70" cy="236" r="2.4"/><circle cx="96" cy="240" r="1.8"/><circle cx="120" cy="232" r="2.2"/><circle cx="84" cy="226" r="1.5"/><circle cx="108" cy="244" r="2"/><circle cx="132" cy="238" r="1.6"/></g>
+          <g class="foam" fill="#FFF6E0"><rect x="-20" y="44" width="230" height="26"/><circle cx="40" cy="48" r="14"/><circle cx="66" cy="42" r="16"/><circle cx="95" cy="46" r="15"/><circle cx="124" cy="41" r="16"/><circle cx="152" cy="47" r="14"/></g>
+        </g>
+      </g>
+      <path d="M30 30 H160 L148 236 Q147 248 135 248 H55 Q43 248 42 236 Z" fill="none" stroke="rgba(255,246,224,.85)" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M48 70 L56 228" stroke="rgba(255,255,255,.25)" stroke-width="6" stroke-linecap="round"/>
+    </svg>
+    <div class="omsg" id="oMsg"></div>
+  </div>
+  <p class="msg" id="oTxt"></p>
+</div>
 <div id="toast" class="toast" role="status"></div>
 <input type="file" id="photoInput" accept="image/*" hidden>
 <input type="file" id="importInput" accept="application/json,.json" hidden>
@@ -950,7 +995,7 @@ function renderBars(){
   $('#barsTop').innerHTML = `
     <div class="segrow"><div class="seg"><button type="button" class="${barView === 'map' ? 'on' : ''}" data-view="map" aria-pressed="${barView === 'map'}">🗺️ Carte</button><button type="button" class="${barView === 'list' ? 'on' : ''}" data-view="list" aria-pressed="${barView === 'list'}">☰ Liste</button></div>
       <span class="count" aria-live="polite">${plural(list.length, 'bar')}</span>
-      <button type="button" class="dice-btn" data-act="dice" aria-label="Lancer le dé : un bar et une bière au hasard">🎲</button></div>
+      <button type="button" class="dice-btn" data-act="dice" aria-label="Demander à la mousse : un bar et une bière au hasard">🔮</button></div>
     <input type="search" class="search" id="beerSearch" placeholder="🔎 Un bar, une bière, une brasserie…" value="${esc(beerQ)}" aria-label="Chercher un bar ou une bière" autocomplete="off" style="margin-bottom:10px">
     <div class="filters">
       <select class="qsel ${barQuarter ? 'on' : ''}" id="qSel" aria-label="Quartier"><option value="">📍 Partout</option>${quarters.map(q => `<option ${q === barQuarter ? 'selected' : ''}>${esc(q)}</option>`).join('')}</select>
@@ -1317,29 +1362,47 @@ function rattle(){
     n.connect(f).connect(g).connect(actx.destination); n.start();
   } catch(e){}
 }
+function fizzSound(){
+  if (!state.settings.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume();
+    const len = Math.floor(actx.sampleRate * 1.3), buf = actx.createBuffer(1, len, actx.sampleRate), ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) { const env = Math.min(1, i / (actx.sampleRate * .05)) * Math.pow(1 - i / len, 2); ch[i] = (Math.random() * 2 - 1) * env * (Math.random() < .02 ? 3 : .5); }
+    const n = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+    n.buffer = buf; f.type = 'highpass'; f.frequency.value = 2500; g.gain.value = .35;
+    n.connect(f).connect(g).connect(actx.destination); n.start();
+  } catch(e){}
+}
+let oracleTimers = [];
 function rollDice(fromShake){
   if (rolling) return;
   if (!fromShake) enableShake();
   const res = diceDraw();
   if (!res) { toast('Aucun bar ouvert avec une carte de bières pour l’instant 🌙'); return; }
   rolling = true; if (!$('#sheet').hidden) closeSheet();
-  const ov = $('#dice'), face = $('#dieFace');
-  ov.hidden = false; ov.classList.remove('roll'); void ov.offsetWidth; ov.classList.add('roll');
-  let k = 0; const iv = setInterval(() => { face.innerHTML = dieFace(1 + Math.floor(Math.random() * 6)); if (k++ % 2 === 0) rattle(); }, 90);
-  setTimeout(() => { clearInterval(iv); face.innerHTML = dieFace(1 + Math.floor(Math.random() * 6)); try { navigator.vibrate && navigator.vibrate([20, 40, 20]); } catch(e){} }, 1100);
-  setTimeout(() => { ov.hidden = true; ov.classList.remove('roll'); rolling = false; showDice(res); }, 1550);
+  const ov = $('#dice'), txt = $('#oTxt');
+  $('#oMsg').innerHTML = `<span class="tri"><b>${esc(res.bar.name)}</b><small>${esc(res.beer)}</small></span>`;
+  ov.classList.remove('shake', 'reveal'); ov.hidden = false; void ov.offsetWidth; ov.classList.add('shake');
+  txt.textContent = 'La mousse s’agite…'; fizzSound();
+  const done = () => { oracleTimers.forEach(clearTimeout); oracleTimers = []; ov.hidden = true; ov.classList.remove('shake', 'reveal'); ov.onclick = null; rolling = false; showDice(res); };
+  oracleTimers = [
+    setTimeout(() => { ov.classList.remove('shake'); txt.textContent = 'Elle retombe…'; }, 1000),
+    setTimeout(() => { ov.classList.add('reveal'); txt.textContent = 'La mousse a parlé'; try { navigator.vibrate && navigator.vibrate(30); } catch(e){} }, 1500),
+    setTimeout(done, 3600)
+  ];
+  ov.onclick = () => { if (ov.classList.contains('reveal')) done(); };
 }
 function showDice(res){
   const bar = res.bar, beer = res.beer, now = new Date(), d = myPos ? dist(bar) : null, L = mapsLinks(bar);
   const st = hhStatus(bar, now);
-  showSheet(`<p class="eyebrow">🎲 Le dé a parlé</p>
+  showSheet(`<p class="eyebrow">🔮 La mousse a parlé</p>
     <h3>Ce soir : ${esc(bar.name)}</h3>
     <p class="muted" style="margin:0 0 4px">${esc(bar.addr || bar.q || '')}${d != null ? ' · à ' + Math.max(1, Math.round(d / 80)) + ' min à pied' : ''}</p>
     ${openTag(bar, now)}${st && (st.on || st.soon) ? `<span class="hh ${st.on ? 'on' : 'soon'}" style="display:table">${hhLabel(st)}</span>` : ''}
     <div class="dicebeer"><span class="eyebrow">Goûte la</span><strong>${esc(beer)}</strong>${beerMeta(beer) ? `<span class="small muted">${esc(beerMeta(beer))}</span>` : ''}</div>
-    <div class="row" style="margin-bottom:10px"><a class="btn primary" href="${esc(L.apple)}" target="_blank" rel="noopener">🗺️ Y aller</a><button type="button" class="btn ghost" data-act="dice">🎲 Relancer</button></div>
+    <div class="row" style="margin-bottom:10px"><a class="btn primary" href="${esc(L.apple)}" target="_blank" rel="noopener">🗺️ Y aller</a><button type="button" class="btn ghost" data-act="dice">🔮 Redemander</button></div>
     <div class="row"><button type="button" class="btn ghost sm" id="dBar">Voir le bar</button><button type="button" class="btn ghost sm" id="dStamp">🍺 J’y suis, je tamponne</button></div>
-    ${shakeOn ? '<p class="small muted" style="margin:12px 0 0;text-align:center">Secoue ton téléphone pour relancer.</p>' : ''}`);
+    ${shakeOn ? '<p class="small muted" style="margin:12px 0 0;text-align:center">Secoue ton téléphone pour redemander.</p>' : ''}`);
   $('#dBar').onclick = () => openBar(bar.id);
   $('#dStamp').onclick = () => openQuickStamp(bar.id, beer);
 }
